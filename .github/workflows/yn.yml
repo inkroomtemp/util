@@ -20,8 +20,10 @@ jobs:
       # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
       - name: Runtime
         run: |
-          sudo apt update -y 
-          sudo apt install -y firefox-esr
+          sudo apt update -y && sudo apt upgrade -y
+          sudo add-apt-repository ppa:mozillateam/ppaadd-apt-repository ppa:mozillateam/ppa
+          sudo apt update
+          sudo apt install firefox-esr-esr
           npm i
           mkdir /demo 
           cd /demo 
