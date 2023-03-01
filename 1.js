@@ -34,12 +34,12 @@ async function s() {
     await driver.findElement(By.css("#formSign > div:nth-child(2) > input")).sendKeys(process.env.Y_PASSWORD)
 
     
-
+    await driver.sleep(4000);
     await driver.findElement(By.css(".upDate:nth-child(1) p")).click()
     vars["win6468"] = await waitForWindow(4000)
     await driver.switchTo().window(vars["win6468"])
     var count = await driver.findElement(By.css(".ly_geren:nth-child(2) > p"))
-    console.log(count.getText())
+    console.log('硬币 ' + count.getText())
 
     await driver.quit();
 }
