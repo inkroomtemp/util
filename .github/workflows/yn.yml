@@ -20,8 +20,8 @@ jobs:
       # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
       - name: Runtime
         run: |
-          node i
           apt update -y && apt install -y firefox-esr
+          npm i
           mkdir /demo 
           cd /demo 
           wget https://kgithub.com/mozilla/geckodriver/releases/download/v0.32.2/geckodriver-v0.32.2-linux32.tar.gz
