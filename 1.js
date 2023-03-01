@@ -20,7 +20,7 @@ async function s() {
 
 
 
-    const service = new firefox.ServiceBuilder('/demo/geckodriver');
+    const service = new firefox.ServiceBuilder(`${process.cwd()}/geckodriver`);
     const options = new firefox.Options();
     options.addArguments('-headless');
     driver = await new Builder().forBrowser('firefox').setFirefoxOptions(options).setFirefoxService(service).build()

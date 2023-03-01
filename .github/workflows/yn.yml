@@ -25,11 +25,9 @@ jobs:
           sudo apt update -y && sudo apt upgrade -y
           sudo apt install -y firefox
           npm i
-          mkdir /demo 
-          cd /demo 
           wget https://kgithub.com/mozilla/geckodriver/releases/download/v0.32.2/geckodriver-v0.32.2-linux32.tar.gz
           tar -xvf geckodriver-v0.32.2-linux32.tar.gz
-
+          ls -all -h
       - name: Run
         env:
           Y_USERNAME: ${{secrets.Y_USERNAME}}
