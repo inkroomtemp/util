@@ -67,9 +67,10 @@ console.log('ok');
 
         await driver.sleep(3000);
         console.log('href = ' + await driver.executeScript('return location.href'));
-
-           let r = await driver.executeScript("return (document.getElementsByTagName('body')[0].innerHTML )")
-   console.log(r);
+        await driver.executeScript("location.reload()");
+        await driver.sleep(4000);
+//            let r = await driver.executeScript("return (document.getElementsByTagName('body')[0].innerHTML )")
+//    console.log(r);
 
     var count = await driver.findElement(By.css("body"))
     console.log(await count.getText())
