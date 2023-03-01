@@ -10,10 +10,10 @@ async function waitForWindow(timeout = 2) {
     const handlesThen = vars["windowHandles"]
     const handlesNow = await driver.getAllWindowHandles()
     if (handlesNow.length > handlesThen.length) {
-        return handlesNow.find(handle => (!handlesThen.includes(handle)))
+      return handlesNow.find(handle => (!handlesThen.includes(handle)))
     }
     throw new Error("New window did not appear before timeout")
-}
+  }
 
 async function s() {
 
@@ -33,16 +33,14 @@ async function s() {
     await driver.findElement(By.css("#formSign > div:nth-child(2) > input")).click()
     await driver.findElement(By.css("#formSign > div:nth-child(2) > input")).sendKeys(process.env.Y_PASSWORD)
 
-    // await driver.get("https://www.oschina.net/")
-    // await driver.manage().window().setRect({ width: 550, height: 691 })
-    // vars["windowHandles"] = await driver.getAllWindowHandles()
-    // await driver.findElement(By.css(".panel-content__column:nth-child(1) > .tab-page:nth-child(3) .item:nth-child(1) > .item-title")).click()
+    
 
-   
-    // vars["win3843"] = await waitForWindow(2000)
-    // await driver.switchTo().window(vars["win3843"])
-    // var text = await driver.findElement(By.className('article-box__title')).getText()
-    // console.log(text);
+    await driver.findElement(By.css(".upDate:nth-child(1) p")).click()
+    vars["win6468"] = await waitForWindow(4000)
+    await driver.switchTo().window(vars["win6468"])
+    var count = await driver.findElement(By.css(".ly_geren:nth-child(2) > p"))
+    console.log(count.getText())
+
     await driver.quit();
 }
 s();
