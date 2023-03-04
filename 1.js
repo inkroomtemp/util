@@ -42,7 +42,8 @@ async function s() {
       .perform()
 //    await driver.findElement(By.css("button:nth-child(4)")).click()
         await driver.sleep(5000);
-
+        await driver.executeScript("location.reload()");
+        await driver.sleep(5000);
 //    await driver.sleep(4000);
 
 //    await driver.get("https://yngal.com/");
@@ -53,7 +54,7 @@ async function s() {
 //    await driver.findElement(By.css(".upDate:nth-child(1) p")).click()
 console.log('before');
         vars["windowHandles"] = await driver.getAllWindowHandles();
-   const clickable = await driver.findElement(By.css(".upDate:nth-child(1) p"))
+   const clickable = await driver.findElement(By.css(".upDate:nth-child(1) p"));// 点击第一项
     await driver.actions()
       .move({ origin: clickable })
       .click()
@@ -67,8 +68,7 @@ console.log('ok');
 
         await driver.sleep(3000);
         console.log('href = ' + await driver.executeScript('return location.href'));
-        await driver.executeScript("location.reload()");
-        await driver.sleep(4000);
+
 //            let r = await driver.executeScript("return (document.getElementsByTagName('body')[0].innerHTML )")
 //    console.log(r);
 
