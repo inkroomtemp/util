@@ -24,7 +24,6 @@ jobs:
       - name: Rust Latest Version
         id: v
         run: |
-          mkdir docker
           cd rust
           cargo build --release
           ve=$(./target/release/rust)
@@ -73,7 +72,7 @@ jobs:
         uses: docker/build-push-action@v4
         if: steps.v.outputs.u == 'true'
         with:
-          context: docker
+          context: runtime
           file: Dockerfile.rust
           push: true
           tags: ${{ steps.meta.outputs.tags }}
