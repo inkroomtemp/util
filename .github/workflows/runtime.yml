@@ -33,7 +33,7 @@ jobs:
             echo "暂无最新版本"
             echo "u=false" >> $GITHUB_OUTPUT
           fi
-          d=$(docker run --rm ghcr.io/${{ github.repository_owner }}/rust:latest rustc --version)
+          d=$(docker run --rm ghcr.io/${{ github.repository_owner }}/rust:latest rustc --version || true)
           echo "docker version=$d"
           echo "latest version=$ve"
           result=$(echo $d | grep $ve)
