@@ -73,8 +73,8 @@ jobs:
             type=raw,value=latest,enable=true
             type=raw,value=${{ steps.v.outputs.ve }}
           labels: |
-            org.opencontainers.image.description=rust版本的git-lfs-server
-            org.opencontainers.image.title=git-lfs-server-rust
+            org.opencontainers.image.description=rust开发环境
+            org.opencontainers.image.title=rust
       - name: Build Docker image
         uses: docker/build-push-action@v4
         if: steps.v.outputs.u == 'true'
