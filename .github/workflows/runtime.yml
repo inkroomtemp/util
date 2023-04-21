@@ -41,7 +41,6 @@ jobs:
             echo "u=true" >> $GITHUB_OUTPUT
             echo "ve=$ve" >> $GITHUB_OUTPUT
           fi
-          tree
       - name: Set up QEMU
         if: steps.v.outputs.u == 'true'
         uses: docker/setup-qemu-action@v2
@@ -81,7 +80,7 @@ jobs:
         with:
           context: runtime
           file: runtime/Dockerfile.rust
-          platforms: linux/amd64,linux/arm64,linux/arm/v7
+          platforms: linux/amd64,linux/arm/v7,linux/386,linux/arm64/v8
           push: true
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
