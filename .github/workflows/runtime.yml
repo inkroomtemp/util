@@ -19,12 +19,10 @@ jobs:
         with:
           toolchain: 1.68.1
           override: true
-      - name: Rust Latest Version
+      - name: Fetch Latest Version
         id: v
         run: |
-          cd rust
-          cargo build --release
-          ve=$(./target/release/rust)
+          ve=$(docker run  --rm  rust:slim-buster rustc --version)
           if [[ $ve == "null" ]]
           then 
             echo "暂无最新版本"
