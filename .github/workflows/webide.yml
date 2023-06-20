@@ -1,14 +1,15 @@
-name: node
+name: webide
 
 on:
   workflow_dispatch:
     inputs:
-      version:
-        description: "node version"
+      version: 
+        description: version
         required: true
         type: string
+
 jobs:
-  node:
+  webide:
     runs-on: ubuntu-20.04
     permissions: write-all
     steps:
@@ -37,23 +38,23 @@ jobs:
         uses: docker/metadata-action@v4
         with:
           images: |
-            ghcr.io/${{ github.repository_owner }}/node
-            ${{ secrets.DOCKER_HUB_USERNAME }}/node
+            ghcr.io/${{ github.repository_owner }}/ide
+            ${{ secrets.DOCKER_HUB_USERNAME }}/ide
           tags: |
             type=raw,value=latest,enable=true
             type=raw,value=${{ inputs.version }}
           labels: |
-            org.opencontainers.image.description=node开发环境
-            org.opencontainers.image.title=rust
+            org.opencontainers.image.description=webide, 带有node18、openjdk17
+            org.opencontainers.image.title=webide
       - name: Build Docker image
         uses: docker/build-push-action@v4
         with:
           context: runtime
-          file: runtime/Dockerfile.node
-          platforms: linux/amd64,linux/arm/v7,linux/arm64/v8,linux/ppc64le,linux/s390x
+          file: runtime/Dockerfile.ide
+          platforms: linux/amd64
           push: true
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
           github-token: ${{ secrets.GITHUB_TOKEN }}
           build-args: |
-            NODE_VERSION=${{ inputs.version }}
+            IDE_VERSION=${{ inputs.version }}
