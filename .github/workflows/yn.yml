@@ -34,4 +34,4 @@ jobs:
           Y_USERNAME: ${{secrets.Y_USERNAME}}
           Y_PASSWORD: ${{secrets.Y_PASSWORD}}
         run: |
-          node 1.js
+          node yn.js

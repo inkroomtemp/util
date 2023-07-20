@@ -44,13 +44,20 @@ jobs:
             type=raw,value=${{ inputs.version }}
           labels: |
             org.opencontainers.image.description=node开发环境
-            org.opencontainers.image.title=rust
+            org.opencontainers.image.title=node
+      - name: Platforms
+        id: platforms
+        run: |
+          npm i axios
+          p=$(node arch.js library node inputs.version)
+          echo "支持的架构: $p"
+          echo "p=$v" >> $GITHUB_OUTPUT
       - name: Build Docker image
         uses: docker/build-push-action@v4
         with:
           context: runtime
           file: runtime/Dockerfile.node
-          platforms: linux/amd64,linux/arm/v7,linux/arm64/v8,linux/ppc64le
+          platforms: ${{ steps.platforms.outputs.p }}
           push: true
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
