@@ -86,10 +86,9 @@ jobs:
     permissions: write-all
     needs: [version]
     if: needs.version.outputs.u == 'true'
-    platforms:
-      strategy:
-        matrix:
-          platform: [linux/386, linux/amd64, linux/arm/v7, linux/arm64]
+    strategy:
+      matrix:
+        platform: [linux/386, linux/amd64, linux/arm/v7, linux/arm64]
     steps:
       - name: Checkout repository
         uses: actions/checkout@v3
