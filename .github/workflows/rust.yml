@@ -5,20 +5,19 @@ on:
     - cron: '0 0 * * *'
   workflow_dispatch:
 jobs:
-  rust:
+  version:
     runs-on: ubuntu-20.04
-    permissions: write-all
+    outputs:
+      ve: ${{ steps.v.outputs.ve }}
+      u: ${{ steps.v.outputs.u }}
+      buildVve: ${{ steps.buildV.outputs.ve }}
+      buildVu: ${{ steps.buildV.outputs.u }}
     steps:
       - name: Checkout repository
         uses: actions/checkout@v3
       - name: Checkout Runtime
         run: |
           git clone https://gist.github.com/inkroom/501548078a930c6f3bd98ea257409648 runtime
-      - name: Rust
-        uses: actions-rs/toolchain@v1
-        with:
-          toolchain: 1.68.1
-          override: true
       - name: Fetch Latest Version
         id: v
         run: |
@@ -62,8 +61,12 @@ jobs:
             echo "u=true" >> $GITHUB_OUTPUT
             echo "ve=$ve" >> $GITHUB_OUTPUT
           fi
+  musl:
+    runs-on: ubuntu-20.04
+    needs: [version]
+    if: needs.version.outputs.buildVu == 'true'
+    steps:
       - name: Set up QEMU
-        if: steps.v.outputs.u == 'true'
         uses: docker/setup-qemu-action@v2
       - name: Log in to the Container registry
         uses: docker/login-action@v2
@@ -72,23 +75,43 @@ jobs:
           username: ${{ github.repository_owner }}
           password: ${{ secrets.GITHUB_TOKEN }}
       - name: Push musl Image
-        if: steps.buildV.outputs.u == 'true'
         run: |
+          docker pull registry.gitlab.com/rust_musl_docker/image:stable-latest
           docker tag registry.gitlab.com/rust_musl_docker/image:stable-latest ghcr.io/${{ github.repository_owner }}/rust_musl_build:latest
-          docker tag registry.gitlab.com/rust_musl_docker/image:stable-latest ghcr.io/${{ github.repository_owner }}/rust_musl_build:${{  steps.buildV.outputs.ve }}
+          docker tag registry.gitlab.com/rust_musl_docker/image:stable-latest ghcr.io/${{ github.repository_owner }}/rust_musl_build:${{  needs.version.outputs.buildVve }}
           docker push ghcr.io/${{ github.repository_owner }}/rust_musl_build:latest
-          docker push ghcr.io/${{ github.repository_owner }}/rust_musl_build:${{  steps.buildV.outputs.ve }}
+          docker push ghcr.io/${{ github.repository_owner }}/rust_musl_build:${{  needs.version.outputs.buildVve }}
+  dev:
+    runs-on: ubuntu-20.04
+    permissions: write-all
+    needs: [version]
+    if: needs.version.outputs.u == 'true'
+    platforms:
+      strategy:
+        matrix:
+          platform: [linux/386, linux/amd64, linux/arm/v7, linux/arm64]
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+      - name: Checkout Runtime
+        run: |
+          git clone https://gist.github.com/inkroom/501548078a930c6f3bd98ea257409648 runtime
+      - name: Set up QEMU
+        uses: docker/setup-qemu-action@v2
+      - name: Log in to the Container registry
+        uses: docker/login-action@v2
+        with:
+          registry: ghcr.io
+          username: ${{ github.repository_owner }}
+          password: ${{ secrets.GITHUB_TOKEN }}
       - name: Set up Docker Buildx
-        if: steps.v.outputs.u == 'true'
         uses: docker/setup-buildx-action@v2
       - name: Log in to the Docker Hub
-        if: steps.v.outputs.u == 'true'
         uses: docker/login-action@v2
         with:
           username: ${{ secrets.DOCKER_HUB_USERNAME }}
           password: ${{ secrets.DOCKER_HUB_PASSWORD }}
       - name: Extract metadata (tags, labels) for Docker
-        if: steps.v.outputs.u == 'true'
         id: meta
         uses: docker/metadata-action@v4
         with:
@@ -97,19 +120,19 @@ jobs:
             ${{ secrets.DOCKER_HUB_USERNAME }}/rust
           tags: |
             type=raw,value=latest,enable=true
-            type=raw,value=${{ steps.v.outputs.ve }}
+            type=raw,value=${{ needs.version.outputs.ve }}
           labels: |
             org.opencontainers.image.description=rust开发环境
             org.opencontainers.image.title=rust
       - name: Build Docker image
         uses: docker/build-push-action@v4
-        if: steps.v.outputs.u == 'true'
         with:
           context: runtime
           file: runtime/Dockerfile.rust
           push: true
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
+          platforms: ${{ matrix.platform }}
           github-token: ${{ secrets.GITHUB_TOKEN }}
           build-args: |
-            RUST_VERSION=${{ steps.v.outputs.ve }}
+            RUST_VERSION=${{ needs.version.outputs.ve }}
