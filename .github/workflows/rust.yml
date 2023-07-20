@@ -110,6 +110,11 @@ jobs:
         with:
           username: ${{ secrets.DOCKER_HUB_USERNAME }}
           password: ${{ secrets.DOCKER_HUB_PASSWORD }}
+      - name: Arch
+        id: arch
+        run: |
+          arch=$(echo ${{ matrix.platform }} | awk '{b=gensub(/linux\//,"",1,$0);b=gensub(/\//,"-","g",b); print b}')
+          echo "arch=$arch" >> $GITHUB_OUTPUT
       - name: Extract metadata (tags, labels) for Docker
         id: meta
         uses: docker/metadata-action@v4
@@ -118,11 +123,10 @@ jobs:
             ghcr.io/${{ github.repository_owner }}/rust
             ${{ secrets.DOCKER_HUB_USERNAME }}/rust
           tags: |
-            type=raw,value=latest,enable=true
-            type=raw,value=${{ needs.version.outputs.ve }}
+            type=raw,value=${{ steps.arch.outputs.arch }}
           labels: |
-            org.opencontainers.image.description=rust开发环境
-            org.opencontainers.image.title=rust
+            org.opencontainers.image.description=rust开发环境-${{ steps.arch.outputs.arch }}
+            org.opencontainers.image.title=rust-${{ steps.arch.outputs.arch }}
       - name: Build Docker image
         uses: docker/build-push-action@v4
         with:
@@ -135,3 +139,47 @@ jobs:
           github-token: ${{ secrets.GITHUB_TOKEN }}
           build-args: |
             RUST_VERSION=${{ needs.version.outputs.ve }}
+  manifest:
+    runs-on: ubuntu-20.04
+    permissions: write-all
+    needs: [version, dev]
+    # 直接push  会导致 新推送覆盖旧推送，所以只能分开推送到不同tag，最后才采取合并
+    if: needs.version.outputs.u == 'true'
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+      - name: Log in to the Container registry
+        uses: docker/login-action@v2
+        with:
+          registry: ghcr.io
+          username: ${{ github.repository_owner }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v2
+      - name: Log in to the Docker Hub
+        uses: docker/login-action@v2
+        with:
+          username: ${{ secrets.DOCKER_HUB_USERNAME }}
+          password: ${{ secrets.DOCKER_HUB_PASSWORD }}
+      - name: Create Manifest
+        run: |
+          docker manifest create --insecure ghcr.io/${{ github.repository_owner }}/rust:${{ needs.version.outputs.ve }} ghcr.io/${{ github.repository_owner }}/rust:amd64 ghcr.io/${{ github.repository_owner }}/rust:386 ghcr.io/${{ github.repository_owner }}/rust:arm-v7 ghcr.io/${{ github.repository_owner }}/rust:arm64
+          
+          docker manifest annotate  ghcr.io/${{ github.repository_owner }}/rust:${{ needs.version.outputs.ve }} ghcr.io/${{ github.repository_owner }}/rust:amd64 --os linux --arch amd64 
+          docker manifest annotate  ghcr.io/${{ github.repository_owner }}/rust:${{ needs.version.outputs.ve }} ghcr.io/${{ github.repository_owner }}/rust:386 --os linux --arch 386
+          docker manifest annotate  ghcr.io/${{ github.repository_owner }}/rust:${{ needs.version.outputs.ve }} ghcr.io/${{ github.repository_owner }}/rust:arm-v7 --os linux --arch arm --variant v7
+          docker manifest annotate  ghcr.io/${{ github.repository_owner }}/rust:${{ needs.version.outputs.ve }} ghcr.io/${{ github.repository_owner }}/rust:arm64 --os linux --arch arm64
+
+          docker manifest push --insecure ghcr.io/${{ github.repository_owner }}/rust:${{ needs.version.outputs.ve }}
+          
+                 
+          docker manifest create --insecure ${{ github.repository_owner }}/rust:${{ needs.version.outputs.ve }} ${{ github.repository_owner }}/rust:amd64 ${{ github.repository_owner }}/rust:386 ${{ github.repository_owner }}/rust:arm-v7 ${{ github.repository_owner }}/rust:arm64
+     
+          docker manifest annotate  ${{ github.repository_owner }}/rust:${{ needs.version.outputs.ve }} ${{ github.repository_owner }}/rust:amd64 --os linux --arch amd64 
+          docker manifest annotate  ${{ github.repository_owner }}/rust:${{ needs.version.outputs.ve }} ${{ github.repository_owner }}/rust:386 --os linux --arch 386
+          docker manifest annotate  ${{ github.repository_owner }}/rust:${{ needs.version.outputs.ve }} ${{ github.repository_owner }}/rust:arm-v7 --os linux --arch arm --variant v7
+          docker manifest annotate  ${{ github.repository_owner }}/rust:${{ needs.version.outputs.ve }} ${{ github.repository_owner }}/rust:arm64 --os linux --arch arm64
+
+          docker manifest push --insecure ${{ github.repository_owner }}/rust:${{ needs.version.outputs.ve }}
+          
+          
