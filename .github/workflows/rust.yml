@@ -121,8 +121,8 @@ jobs:
         with:
           images: |
             ${{ secrets.DOCKER_HUB_USERNAME }}/rust
-          tags: |
-            type=raw,value=${{ needs.version.outputs.ve }}
+          # tags: |
+          #   type=raw,value=${{ needs.version.outputs.ve }}
           labels: |
             org.opencontainers.image.description=rust开发环境-${{ needs.version.outputs.ve }}
             org.opencontainers.image.title=rust-${{ needs.version.outputs.ve }}
@@ -171,6 +171,8 @@ jobs:
         with:
           images: |
             ${{ secrets.DOCKER_HUB_USERNAME }}/rust
+          tags: |
+            type=raw,value=${{ needs.version.outputs.ve }}
       - name: Log in to the Container registry
         uses: docker/login-action@v2
         with:
@@ -186,7 +188,7 @@ jobs:
         working-directory: /tmp/digests
         run: |
           docker buildx imagetools create $(jq -cr '.tags | map("-t " + .) | join(" ")' <<< "$DOCKER_METADATA_OUTPUT_JSON") \
-            $(printf '${{ secrets.DOCKER_HUB_USERNAME }}/rust@sha256:%s ' *)
+            $(printf '${{ secrets.DOCKER_HUB_USERNAME }}/rust:${{ needs.version.outputs.ve }}@sha256:%s ' *)
       - name: Inspect image
         run: |
           docker buildx imagetools inspect ${{ secrets.DOCKER_HUB_USERNAME }}/rust:${{ needs.version.outputs.ve }}
