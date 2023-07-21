@@ -97,14 +97,14 @@ jobs:
           git clone https://gist.github.com/inkroom/501548078a930c6f3bd98ea257409648 runtime
       - name: Set up QEMU
         uses: docker/setup-qemu-action@v2
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v2
       - name: Log in to the Container registry
         uses: docker/login-action@v2
         with:
           registry: ghcr.io
           username: ${{ github.repository_owner }}
           password: ${{ secrets.GITHUB_TOKEN }}
-      - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v2
       - name: Log in to the Docker Hub
         uses: docker/login-action@v2
         with:
@@ -123,10 +123,10 @@ jobs:
             ghcr.io/${{ github.repository_owner }}/rust
             ${{ secrets.DOCKER_HUB_USERNAME }}/rust
           tags: |
-            type=raw,value=${{ steps.arch.outputs.arch }}
+            type=raw,value=${{ needs.version.outputs.ve }}
           labels: |
-            org.opencontainers.image.description=rust开发环境-${{ steps.arch.outputs.arch }}
-            org.opencontainers.image.title=rust-${{ steps.arch.outputs.arch }}
+            org.opencontainers.image.description=rust开发环境-${{ needs.version.outputs.ve }}
+            org.opencontainers.image.title=rust-${{ needs.version.outputs.ve }}
       - name: Build Docker image
         uses: docker/build-push-action@v4
         with:
@@ -136,50 +136,63 @@ jobs:
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
           platforms: ${{ matrix.platform }}
+          outputs: type=image,name=${{ github.repository_owner }}/rust,push-by-digest=true,name-canonical=true,push=true
           github-token: ${{ secrets.GITHUB_TOKEN }}
           build-args: |
             RUST_VERSION=${{ needs.version.outputs.ve }}
-  manifest:
+      - name: Export digest
+        run: |
+          mkdir -p /tmp/digests
+          digest="${{ steps.build.outputs.digest }}"
+          touch "/tmp/digests/${digest#sha256:}"
+      - name: Upload digest
+        uses: actions/upload-artifact@v3
+        with:
+          name: digests
+          path: /tmp/digests/*
+          if-no-files-found: error
+          retention-days: 1
+  combine:
     runs-on: ubuntu-20.04
     permissions: write-all
     needs: [version, dev]
-    # 直接push  会导致 新推送覆盖旧推送，所以只能分开推送到不同tag，最后才采取合并
+    # 使用 manifest 合并会报  is a manifest list  可能跟qemu buildx 有关，所以换种方案
     if: needs.version.outputs.u == 'true'
     steps:
-      - name: Checkout repository
-        uses: actions/checkout@v3
+      - name: Download digests
+        uses: actions/download-artifact@v3
+        with:
+          name: digests
+          path: /tmp/digests
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v2
+      - name: Docker meta
+        id: meta
+        uses: docker/metadata-action@v4
+        with:
+          images: |
+            ghcr.io/${{ github.repository_owner }}/rust
+            ${{ secrets.DOCKER_HUB_USERNAME }}/rust
       - name: Log in to the Container registry
         uses: docker/login-action@v2
         with:
           registry: ghcr.io
           username: ${{ github.repository_owner }}
           password: ${{ secrets.GITHUB_TOKEN }}
-      - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v2
-      - name: Log in to the Docker Hub
+      - name: Login to Docker Hub
         uses: docker/login-action@v2
         with:
-          username: ${{ secrets.DOCKER_HUB_USERNAME }}
-          password: ${{ secrets.DOCKER_HUB_PASSWORD }}
-      - name: Create Manifest
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+      - name: Create manifest list and push
+        working-directory: /tmp/digests
         run: |
-          docker manifest create --insecure ghcr.io/${{ github.repository_owner }}/rust:${{ needs.version.outputs.ve }} ghcr.io/${{ github.repository_owner }}/rust:amd64 ghcr.io/${{ github.repository_owner }}/rust:386 ghcr.io/${{ github.repository_owner }}/rust:arm-v7 ghcr.io/${{ github.repository_owner }}/rust:arm64
-          
-          docker manifest annotate  ghcr.io/${{ github.repository_owner }}/rust:${{ needs.version.outputs.ve }} ghcr.io/${{ github.repository_owner }}/rust:amd64 --os linux --arch amd64 
-          docker manifest annotate  ghcr.io/${{ github.repository_owner }}/rust:${{ needs.version.outputs.ve }} ghcr.io/${{ github.repository_owner }}/rust:386 --os linux --arch 386
-          docker manifest annotate  ghcr.io/${{ github.repository_owner }}/rust:${{ needs.version.outputs.ve }} ghcr.io/${{ github.repository_owner }}/rust:arm-v7 --os linux --arch arm --variant v7
-          docker manifest annotate  ghcr.io/${{ github.repository_owner }}/rust:${{ needs.version.outputs.ve }} ghcr.io/${{ github.repository_owner }}/rust:arm64 --os linux --arch arm64
-
-          docker manifest push --insecure ghcr.io/${{ github.repository_owner }}/rust:${{ needs.version.outputs.ve }}
-          
-                 
-          docker manifest create --insecure ${{ github.repository_owner }}/rust:${{ needs.version.outputs.ve }} ${{ github.repository_owner }}/rust:amd64 ${{ github.repository_owner }}/rust:386 ${{ github.repository_owner }}/rust:arm-v7 ${{ github.repository_owner }}/rust:arm64
-     
-          docker manifest annotate  ${{ github.repository_owner }}/rust:${{ needs.version.outputs.ve }} ${{ github.repository_owner }}/rust:amd64 --os linux --arch amd64 
-          docker manifest annotate  ${{ github.repository_owner }}/rust:${{ needs.version.outputs.ve }} ${{ github.repository_owner }}/rust:386 --os linux --arch 386
-          docker manifest annotate  ${{ github.repository_owner }}/rust:${{ needs.version.outputs.ve }} ${{ github.repository_owner }}/rust:arm-v7 --os linux --arch arm --variant v7
-          docker manifest annotate  ${{ github.repository_owner }}/rust:${{ needs.version.outputs.ve }} ${{ github.repository_owner }}/rust:arm64 --os linux --arch arm64
-
-          docker manifest push --insecure ${{ github.repository_owner }}/rust:${{ needs.version.outputs.ve }}
-          
-          
+          docker buildx imagetools create $(jq -cr '.tags | map("-t " + .) | join(" ")' <<< "$DOCKER_METADATA_OUTPUT_JSON") \
+            $(printf 'ghcr.io/${{ github.repository_owner }}/rust@sha256:%s ' *)
+          docker buildx imagetools create $(jq -cr '.tags | map("-t " + .) | join(" ")' <<< "$DOCKER_METADATA_OUTPUT_JSON") \
+            $(printf '${{ secrets.DOCKER_HUB_USERNAME }}/rust@sha256:%s ' *)
+      - name: Inspect image
+        run: |
+          docker buildx imagetools inspect ${{ secrets.DOCKER_HUB_USERNAME }}/rust:${{ needs.version.outputs.ve }}
+          echo "------------------------"
+          docker buildx imagetools inspect ghcr.io/${{ github.repository_owner }}/rust:${{ needs.version.outputs.ve }}
