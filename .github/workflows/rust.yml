@@ -132,7 +132,7 @@ jobs:
       - name: Upload cache
         uses: actions/upload-artifact@v3
         with:
-          name: rust-cache-${{ steps.cache-name.outputs.cache-name }}
+          name: rust-cache-${{ steps.arch.outputs.cache-name }}
           path: /tmp/rust-cache
           if-no-files-found: error
           retention-days: 1
