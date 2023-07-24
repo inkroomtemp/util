@@ -132,7 +132,7 @@ jobs:
       - name: Upload cache
         uses: actions/upload-artifact@v3
         with:
-          name: rust-cache-${{ steps.arch.outputs.cache-name }}
+          name: ${{ steps.arch.outputs.cache-name }}
           path: /tmp/rust-cache
           if-no-files-found: error
           retention-days: 1
@@ -193,7 +193,7 @@ jobs:
             linux/386
             linux/arm/v7
             linux/arm64          
-          cache-from: type=local,src=/tmp/.buildx-cache
+          cache-from: type=local,src=/tmp/rust-cache
           cache-to: type=gha,mode=max
           github-token: ${{ secrets.GITHUB_TOKEN }}
           build-args: |
