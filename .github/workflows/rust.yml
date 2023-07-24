@@ -88,7 +88,7 @@ jobs:
     if: needs.version.outputs.u == 'true'
     strategy:
       matrix:
-        platform: [linux/386, linux/amd64]
+        platform: [linux/386, linux/amd64, linux/arm/v7, linux/arm64]
     steps:
       - name: Checkout repository
         uses: actions/checkout@v3
@@ -115,6 +115,58 @@ jobs:
         run: |
           arch=$(echo ${{ matrix.platform }} | awk '{b=gensub(/linux\//,"",1,$0);b=gensub(/\//,"-","g",b); print b}')
           echo "arch=$arch" >> $GITHUB_OUTPUT
+          echo 'cache-name=rust-cache-${{ matrix.platform }}' | sed 's:/:-:g' >> $GITHUB_OUTPUT
+      - name: Build Docker image
+        uses: docker/build-push-action@v4
+        with:
+          context: runtime
+          file: runtime/Dockerfile.rust
+          push: false
+          tags: rust
+          platforms: ${{ matrix.platform }}
+          cache-from: type=gha
+          cache-to: type=local,dest=/tmp/rust-cache,mode=max
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          build-args: |
+            RUST_VERSION=${{ needs.version.outputs.ve }}
+      - name: Upload cache
+        uses: actions/upload-artifact@v3
+        with:
+          name: ${{ steps.arch.outputs.cache-name }}
+          path: /tmp/rust-cache
+          if-no-files-found: error
+          retention-days: 1
+
+  combine:
+    runs-on: ubuntu-20.04
+    permissions: write-all
+    needs: [version, dev]
+    # 使用 manifest 合并会报  is a manifest list  可能跟qemu buildx 有关，所以换种方案
+    if: needs.version.outputs.u == 'true'
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+      - name: Checkout Runtime
+        run: |
+          git clone https://gist.github.com/inkroom/501548078a930c6f3bd98ea257409648 runtime
+      - name: Download cache
+        uses: actions/download-artifact@v3
+        with:
+          path: /tmp/rust-cache-b
+      - name: Combine Cache
+        run: |
+          mkdir -p /tmp/rust-cache
+          cp -rf /tmp/rust-cache-b/rust-cache-linux-386/* /tmp/rust-cache/
+          cp -rf /tmp/rust-cache-b/rust-cache-linux-arm64/* /tmp/rust-cache/
+          cp -rf /tmp/rust-cache-b/rust-cache-linux-arm-v7/* /tmp/rust-cache/
+          cp -rf /tmp/rust-cache-b/rust-cache-linux-amd64/* /tmp/rust-cache/
+          jq --compact-output -s '.[0].manifests = .[0].manifests + .[1].manifests + [2].manifests + .[3].manifests | .[0]' /tmp/rust-cache-b/rust-cache-linux-amd64/index.json /tmp/rust-cache-b/rust-cache-linux-386.json /tmp/rust-cache-b/rust-cache-linux-arm64/index.json /tmp/rust-cache-b/rust-cache-linux-arm-v7/index.json > /tmp/rust-cache/index.json
+          cat  /tmp/rust-cache/index.json
+          tree /tmp/rust-cache/
+      - name: Set up QEMU
+        uses: docker/setup-qemu-action@v2
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v2
       - name: Extract metadata (tags, labels) for Docker
         id: meta
         uses: docker/metadata-action@v4
@@ -127,52 +179,6 @@ jobs:
           labels: |
             org.opencontainers.image.description=rust开发环境-${{ needs.version.outputs.ve }}
             org.opencontainers.image.title=rust-${{ needs.version.outputs.ve }}
-      - name: Build Docker image
-        uses: docker/build-push-action@v4
-        with:
-          context: runtime
-          file: runtime/Dockerfile.rust
-          push: true
-          tags: ${{ steps.meta.outputs.tags }}
-          labels: ${{ steps.meta.outputs.labels }}
-          platforms: ${{ matrix.platform }}
-          outputs: type=image,name=${{ github.repository_owner }}/rust,name-canonical=true,push=true
-          github-token: ${{ secrets.GITHUB_TOKEN }}
-          build-args: |
-            RUST_VERSION=${{ needs.version.outputs.ve }}
-      - name: Export digest
-        run: |
-          mkdir -p /tmp/digests
-          digest="${{ steps.build.outputs.digest }}"
-          touch "/tmp/digests/${digest#sha256:}"
-      - name: Upload digest
-        uses: actions/upload-artifact@v3
-        with:
-          name: digests
-          path: /tmp/digests/*
-          if-no-files-found: error
-          retention-days: 1
-  combine:
-    runs-on: ubuntu-20.04
-    permissions: write-all
-    needs: [version, dev]
-    # 使用 manifest 合并会报  is a manifest list  可能跟qemu buildx 有关，所以换种方案
-    if: needs.version.outputs.u == 'true'
-    steps:
-      - name: Download digests
-        uses: actions/download-artifact@v3
-        with:
-          name: digests
-          path: /tmp/digests
-      - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v2
-      - name: Docker meta
-        id: meta
-        uses: docker/metadata-action@v4
-        with:
-          images: |
-            ghcr.io/${{ github.repository_owner }}/rust
-            ${{ secrets.DOCKER_HUB_USERNAME }}/rust
       - name: Log in to the Container registry
         uses: docker/login-action@v2
         with:
@@ -182,17 +188,23 @@ jobs:
       - name: Login to Docker Hub
         uses: docker/login-action@v2
         with:
-          username: ${{ secrets.DOCKERHUB_USERNAME }}
-          password: ${{ secrets.DOCKERHUB_TOKEN }}
-      - name: Create manifest list and push
-        working-directory: /tmp/digests
-        run: |
-          docker buildx imagetools create $(jq -cr '.tags | map("-t " + .) | join(" ")' <<< "$DOCKER_METADATA_OUTPUT_JSON") \
-            $(printf 'ghcr.io/${{ github.repository_owner }}/rust@sha256:%s ' *)
-          docker buildx imagetools create $(jq -cr '.tags | map("-t " + .) | join(" ")' <<< "$DOCKER_METADATA_OUTPUT_JSON") \
-            $(printf '${{ secrets.DOCKER_HUB_USERNAME }}/rust@sha256:%s ' *)
-      - name: Inspect image
-        run: |
-          docker buildx imagetools inspect ${{ secrets.DOCKER_HUB_USERNAME }}/rust:${{ needs.version.outputs.ve }}
-          echo "------------------------"
-          docker buildx imagetools inspect ghcr.io/${{ github.repository_owner }}/rust:${{ needs.version.outputs.ve }}
+          username: ${{ secrets.DOCKER_HUB_USERNAME }}
+          password: ${{ secrets.DOCKER_HUB_PASSWORD }}
+      - name: Push Docker image
+        uses: docker/build-push-action@v4
+        with:
+          context: runtime
+          file: runtime/Dockerfile.rust
+          push: true
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
+          platforms: |
+            linux/amd64
+            linux/386
+            linux/arm/v7
+            linux/arm64          
+          cache-from: type=local,src=/tmp/rust-cache
+          cache-to: type=gha,mode=max
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          build-args: |
+            RUST_VERSION=${{ needs.version.outputs.ve }}
