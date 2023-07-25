@@ -156,11 +156,13 @@ jobs:
       - name: Combine Cache
         run: |
           mkdir -p /tmp/rust-cache
+          tree  /tmp/rust-cache-b
           cp -rf /tmp/rust-cache-b/rust-cache-linux-386/* /tmp/rust-cache/
           cp -rf /tmp/rust-cache-b/rust-cache-linux-arm64/* /tmp/rust-cache/
           cp -rf /tmp/rust-cache-b/rust-cache-linux-arm-v7/* /tmp/rust-cache/
           cp -rf /tmp/rust-cache-b/rust-cache-linux-amd64/* /tmp/rust-cache/
-          jq --compact-output -s '.[0].manifests = .[0].manifests + .[1].manifests + [2].manifests + .[3].manifests | .[0]' /tmp/rust-cache-b/rust-cache-linux-amd64/index.json /tmp/rust-cache-b/rust-cache-linux-386.json /tmp/rust-cache-b/rust-cache-linux-arm64/index.json /tmp/rust-cache-b/rust-cache-linux-arm-v7/index.json > /tmp/rust-cache/index.json
+          tree /tmp/rust-cache/
+          jq --compact-output -s '.[0].manifests = .[0].manifests + .[1].manifests + [2].manifests + .[3].manifests | .[0]' /tmp/rust-cache-b/rust-cache-linux-amd64/index.json /tmp/rust-cache-b/rust-cache-linux-386/index.json /tmp/rust-cache-b/rust-cache-linux-arm64/index.json /tmp/rust-cache-b/rust-cache-linux-arm-v7/index.json > /tmp/rust-cache/index.json
           cat  /tmp/rust-cache/index.json
           tree /tmp/rust-cache/
       - name: Set up QEMU
