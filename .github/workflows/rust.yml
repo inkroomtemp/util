@@ -3,6 +3,9 @@ name: rust
 on:
   schedule:
     - cron: '0 0 * * *'
+  push:
+    branches:
+      - master
   workflow_dispatch:
 jobs:
   version:
@@ -129,8 +132,9 @@ jobs:
       - name: Build Docker image
         uses: docker/build-push-action@v4
         with:
-          context: runtime
-          file: runtime/Dockerfile.rust
+          # context: runtime
+          # file: runtime/Dockerfile.rust
+          file: Dockerfile.test
           labels: ${{ steps.meta.outputs.labels }}
           platforms: ${{ matrix.platform }}
           outputs: type=image,name=${{ secrets.DOCKER_HUB_USERNAME }}/rust,push-by-digest=true,name-canonical=true,push=true
