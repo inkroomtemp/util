@@ -198,10 +198,10 @@ jobs:
         run: |
           tree /tmp/digests
           docker buildx imagetools create $(jq -cr '.tags | map("-t " + .) | join(" ")' <<< "$DOCKER_METADATA_OUTPUT_JSON") $(printf '${{ secrets.DOCKER_HUB_USERNAME }}/rust@sha256:%s ' *)
-
+          echo "-------------ghcr-----------"
           docker buildx imagetools create \
-            --tag ghcr.io/${{ secrets.DOCKER_HUB_USERNAME }}/rust:latest \
-            --tag ghcr.io/${{ secrets.DOCKER_HUB_USERNAME }}/rust:${{ needs.version.outputs.ve }} \
+            --tag ghcr.io/${{ github.repository_owner }}/rust:latest \
+            --tag ghcr.io/${{ github.repository_owner }}/rust:${{ needs.version.outputs.ve }} \
             ${{ secrets.DOCKER_HUB_USERNAME }}/rust:${{ needs.version.outputs.ve }}
 
       - name: Inspect image
