@@ -153,10 +153,10 @@ jobs:
 
       - name: Temp Download
         run: |
-          wget https://github.com/inkroomtemp/util/suites/14536410402/artifacts/822670829 -O 386.zip
-          wget https://github.com/inkroomtemp/util/suites/14536410402/artifacts/822670831 -O amd64.zip
-          wget https://github.com/inkroomtemp/util/suites/14536410402/artifacts/822670834 -O arm-v7.zip
-          wget https://github.com/inkroomtemp/util/suites/14536410402/artifacts/822670833 -O arm64.zip
+          wget https://image-1252774288.cos.ap-chengdu.myqcloud.com/rust-cache-linux-386-2.zip -O 386.zip
+          wget https://image-1252774288.cos.ap-chengdu.myqcloud.com/rust-cache-linux-amd64.zip -O amd64.zip
+          wget https://image-1252774288.cos.ap-chengdu.myqcloud.com/rust-cache-linux-arm-v7.zip -O arm-v7.zip
+          wget https://image-1252774288.cos.ap-chengdu.myqcloud.com/rust-cache-linux-arm64.zip -O arm64.zip
 
           mkdir -p /tmp/rust-cache-b/rust-cache-linux-386
           mkdir -p /tmp/rust-cache-b/rust-cache-linux-arm64
