@@ -135,8 +135,8 @@ jobs:
         id: build
         uses: docker/build-push-action@v4
         with:
-          # context: runtime
-          # file: runtime/Dockerfile.rust
+          context: runtime
+          file: runtime/Dockerfile.rust
           file: Dockerfile.test
           labels: ${{ steps.meta.outputs.labels }}
           platforms: ${{ matrix.platform }}
@@ -208,4 +208,4 @@ jobs:
         run: |
           docker buildx imagetools inspect ${{ secrets.DOCKER_HUB_USERNAME }}/rust:${{ needs.version.outputs.ve }}
           echo "------------------------"
-          docker buildx imagetools inspect ghcr.io/${{ secrets.DOCKER_HUB_USERNAME }}/rust:${{ needs.version.outputs.ve }}
+          docker buildx imagetools inspect ghcr.io/${{ github.repository_owner }}/rust:${{ needs.version.outputs.ve }}
