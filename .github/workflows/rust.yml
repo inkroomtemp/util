@@ -4,6 +4,8 @@ on:
   schedule:
     - cron: '0 0 * * *'
   push:
+    paths:
+      - '.github/workflows/rust.yml'
     branches:
       - master
   workflow_dispatch:
@@ -189,10 +191,11 @@ jobs:
         working-directory: /tmp/digests
         run: |
           tree /tmp/digests
-          p=$(jq -cr '.tags | map("-t " + .) | join(" ")' <<< "$DOCKER_METADATA_OUTPUT_JSON") \
-            $(printf '${{ secrets.DOCKER_HUB_USERNAME }}/rust:${{ needs.version.outputs.ve }}@sha256:%s ' *)
-          echo $p
-          docker buildx imagetools create $p
+          p1=$(jq -cr '.tags | map("-t " + .) | join(" ")' <<< "$DOCKER_METADATA_OUTPUT_JSON") 
+          p2=$(printf '${{ secrets.DOCKER_HUB_USERNAME }}/rust:${{ needs.version.outputs.ve }}@sha256:%s ' *)
+          echo $p1
+          echo $p2
+          docker buildx imagetools create $p1 $p2
           docker buildx imagetools create $(jq -cr '.tags | map("-t " + .) | join(" ")' <<< "$DOCKER_METADATA_OUTPUT_JSON") \
             $(printf '${{ secrets.DOCKER_HUB_USERNAME }}/rust:latest@sha256:%s ' *)
       - name: Inspect image
