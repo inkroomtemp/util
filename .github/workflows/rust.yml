@@ -81,66 +81,66 @@ jobs:
           docker tag registry.gitlab.com/rust_musl_docker/image:stable-latest ghcr.io/${{ github.repository_owner }}/rust_musl_build:${{  needs.version.outputs.buildVve }}
           docker push ghcr.io/${{ github.repository_owner }}/rust_musl_build:latest
           docker push ghcr.io/${{ github.repository_owner }}/rust_musl_build:${{  needs.version.outputs.buildVve }}
-  dev:
-    runs-on: ubuntu-20.04
-    permissions: write-all
-    needs: [version]
-    if: needs.version.outputs.u == 'true'
-    strategy:
-      matrix:
-        platform: [linux/386, linux/amd64, linux/arm/v7, linux/arm64]
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@v3
-      - name: Checkout Runtime
-        run: |
-          git clone https://gist.github.com/inkroom/501548078a930c6f3bd98ea257409648 runtime
-      - name: Set up QEMU
-        uses: docker/setup-qemu-action@v2
-      - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v2
-      - name: Log in to the Container registry
-        uses: docker/login-action@v2
-        with:
-          registry: ghcr.io
-          username: ${{ github.repository_owner }}
-          password: ${{ secrets.GITHUB_TOKEN }}
-      - name: Log in to the Docker Hub
-        uses: docker/login-action@v2
-        with:
-          username: ${{ secrets.DOCKER_HUB_USERNAME }}
-          password: ${{ secrets.DOCKER_HUB_PASSWORD }}
-      - name: Arch
-        id: arch
-        run: |
-          arch=$(echo ${{ matrix.platform }} | awk '{b=gensub(/linux\//,"",1,$0);b=gensub(/\//,"-","g",b); print b}')
-          echo "arch=$arch" >> $GITHUB_OUTPUT
-          echo 'cache-name=rust-cache-${{ matrix.platform }}' | sed 's:/:-:g' >> $GITHUB_OUTPUT
-      - name: Build Docker image
-        uses: docker/build-push-action@v4
-        with:
-          context: runtime
-          file: runtime/Dockerfile.rust
-          push: false
-          tags: rust
-          platforms: ${{ matrix.platform }}
-          cache-from: type=gha
-          cache-to: type=local,dest=/tmp/rust-cache,mode=max
-          github-token: ${{ secrets.GITHUB_TOKEN }}
-          build-args: |
-            RUST_VERSION=${{ needs.version.outputs.ve }}
-      - name: Upload cache
-        uses: actions/upload-artifact@v3
-        with:
-          name: ${{ steps.arch.outputs.cache-name }}
-          path: /tmp/rust-cache
-          if-no-files-found: error
-          retention-days: 1
+  # dev:
+  #   runs-on: ubuntu-20.04
+  #   permissions: write-all
+  #   needs: [version]
+  #   if: needs.version.outputs.u == 'true'
+  #   strategy:
+  #     matrix:
+  #       platform: [linux/386, linux/amd64, linux/arm/v7, linux/arm64]
+  #   steps:
+  #     - name: Checkout repository
+  #       uses: actions/checkout@v3
+  #     - name: Checkout Runtime
+  #       run: |
+  #         git clone https://gist.github.com/inkroom/501548078a930c6f3bd98ea257409648 runtime
+  #     - name: Set up QEMU
+  #       uses: docker/setup-qemu-action@v2
+  #     - name: Set up Docker Buildx
+  #       uses: docker/setup-buildx-action@v2
+  #     - name: Log in to the Container registry
+  #       uses: docker/login-action@v2
+  #       with:
+  #         registry: ghcr.io
+  #         username: ${{ github.repository_owner }}
+  #         password: ${{ secrets.GITHUB_TOKEN }}
+  #     - name: Log in to the Docker Hub
+  #       uses: docker/login-action@v2
+  #       with:
+  #         username: ${{ secrets.DOCKER_HUB_USERNAME }}
+  #         password: ${{ secrets.DOCKER_HUB_PASSWORD }}
+  #     - name: Arch
+  #       id: arch
+  #       run: |
+  #         arch=$(echo ${{ matrix.platform }} | awk '{b=gensub(/linux\//,"",1,$0);b=gensub(/\//,"-","g",b); print b}')
+  #         echo "arch=$arch" >> $GITHUB_OUTPUT
+  #         echo 'cache-name=rust-cache-${{ matrix.platform }}' | sed 's:/:-:g' >> $GITHUB_OUTPUT
+  #     - name: Build Docker image
+  #       uses: docker/build-push-action@v4
+  #       with:
+  #         context: runtime
+  #         file: runtime/Dockerfile.rust
+  #         push: false
+  #         tags: rust
+  #         platforms: ${{ matrix.platform }}
+  #         cache-from: type=gha
+  #         cache-to: type=local,dest=/tmp/rust-cache,mode=max
+  #         github-token: ${{ secrets.GITHUB_TOKEN }}
+  #         build-args: |
+  #           RUST_VERSION=${{ needs.version.outputs.ve }}
+  #     - name: Upload cache
+  #       uses: actions/upload-artifact@v3
+  #       with:
+  #         name: ${{ steps.arch.outputs.cache-name }}
+  #         path: /tmp/rust-cache
+  #         if-no-files-found: error
+  #         retention-days: 1
 
   combine:
     runs-on: ubuntu-20.04
     permissions: write-all
-    needs: [version, dev]
+    needs: [version]
     # 使用 manifest 合并会报  is a manifest list  可能跟qemu buildx 有关，所以换种方案
     if: needs.version.outputs.u == 'true'
     steps:
@@ -149,10 +149,29 @@ jobs:
       - name: Checkout Runtime
         run: |
           git clone https://gist.github.com/inkroom/501548078a930c6f3bd98ea257409648 runtime
-      - name: Download cache
-        uses: actions/download-artifact@v3
-        with:
-          path: /tmp/rust-cache-b
+
+
+      - name: Temp Download
+        run: |
+          wget https://github.com/inkroomtemp/util/suites/14536410402/artifacts/822670829 -O 386.zip
+          wget https://github.com/inkroomtemp/util/suites/14536410402/artifacts/822670831 -O amd64.zip
+          wget https://github.com/inkroomtemp/util/suites/14536410402/artifacts/822670834 -O arm-v7.zip
+          wget https://github.com/inkroomtemp/util/suites/14536410402/artifacts/822670833 -O arm64.zip
+
+          mkdir -p /tmp/rust-cache-b/rust-cache-linux-386
+          mkdir -p /tmp/rust-cache-b/rust-cache-linux-arm64
+          mkdir -p /tmp/rust-cache-b/rust-cache-linux-arm-v7
+          mkdir -p /tmp/rust-cache-b/rust-cache-linux-amd64
+
+          unzip 386.zip -d /tmp/rust-cache-b/rust-cache-linux-386
+          unzip amd64.zip -d /tmp/rust-cache-b/rust-cache-linux-amd64
+          unzip arm-v7.zip -d /tmp/rust-cache-b/rust-cache-linux-arm-v7
+          unzip arm64.zip -d /tmp/rust-cache-b/rust-cache-linux-arm64
+
+      # - name: Download cache
+      #   uses: actions/download-artifact@v3
+      #   with:
+      #     path: /tmp/rust-cache-b
       - name: Combine Cache
         run: |
           mkdir -p /tmp/rust-cache
@@ -162,7 +181,7 @@ jobs:
           cp -rf /tmp/rust-cache-b/rust-cache-linux-arm-v7/* /tmp/rust-cache/
           cp -rf /tmp/rust-cache-b/rust-cache-linux-amd64/* /tmp/rust-cache/
           tree /tmp/rust-cache/
-          jq --compact-output -s '.[0].manifests = .[0].manifests + .[1].manifests + [2].manifests + .[3].manifests | .[0]' /tmp/rust-cache-b/rust-cache-linux-amd64/index.json /tmp/rust-cache-b/rust-cache-linux-386/index.json /tmp/rust-cache-b/rust-cache-linux-arm64/index.json /tmp/rust-cache-b/rust-cache-linux-arm-v7/index.json > /tmp/rust-cache/index.json
+          jq --compact-output -s '.[0].manifests = .[0].manifests + .[1].manifests + .[2].manifests + .[3].manifests | .[0]' /tmp/rust-cache-b/rust-cache-linux-amd64/index.json /tmp/rust-cache-b/rust-cache-linux-386/index.json /tmp/rust-cache-b/rust-cache-linux-arm64/index.json /tmp/rust-cache-b/rust-cache-linux-arm-v7/index.json > /tmp/rust-cache/index.json
           cat  /tmp/rust-cache/index.json
           tree /tmp/rust-cache/
       - name: Set up QEMU
