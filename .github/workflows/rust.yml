@@ -190,7 +190,7 @@ jobs:
         run: |
           tree /tmp/digests
           p=$(jq -cr '.tags | map("-t " + .) | join(" ")' <<< "$DOCKER_METADATA_OUTPUT_JSON") \
-            $(printf '${{ secrets.DOCKER_HUB_USERNAME }}/rust:needs.version.outputs.ve@sha256:%s ' *)
+            $(printf '${{ secrets.DOCKER_HUB_USERNAME }}/rust:${{ needs.version.outputs.ve }}@sha256:%s ' *)
           echo $p
           docker buildx imagetools create $p
           docker buildx imagetools create $(jq -cr '.tags | map("-t " + .) | join(" ")' <<< "$DOCKER_METADATA_OUTPUT_JSON") \
