@@ -49,7 +49,7 @@ jobs:
         id: platforms
         run: |
           npm i axios
-          p=$(node arch.js library node inputs.version)
+          p=$(node arch.js library node ${{ inputs.version }})
           echo "支持的架构: $p"
           echo "p=$v" >> $GITHUB_OUTPUT
       - name: Build Docker image
