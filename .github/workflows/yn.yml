@@ -20,18 +20,13 @@ jobs:
       # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
       - name: Checkout
         uses: actions/checkout@v3
-      - name: Runtime
-        run: |
-          sudo apt update -y && sudo apt upgrade -y
-          sudo apt install -y firefox
-          npm i
-          wget https://github.com/mozilla/geckodriver/releases/download/v0.32.2/geckodriver-v0.32.2-linux32.tar.gz
-          ls -all -h
-          tar -xvf geckodriver-v0.32.2-linux32.tar.gz
-          ls -all -h
-      - name: Run
-        env:
-          Y_USERNAME: ${{secrets.Y_USERNAME}}
-          Y_PASSWORD: ${{secrets.Y_PASSWORD}}
-        run: |
-          node yn.js
+      - name: Build Docker image
+        uses: docker/build-push-action@v4
+        with:
+          file: Dockerfile.yn
+          push: false
+          tags: yn
+          labels: yn
+          build-args: |
+            Y_USERNAME=${{ secrets.Y_USERNAME }}
+            Y_PASSWORD=${{ secrets.Y_PASSWORD }}
