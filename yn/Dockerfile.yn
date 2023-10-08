@@ -1,0 +1,18 @@
+FROM python:3.12.0
+
+ARG Y_USERNAME
+ARG Y_PASSWORD
+
+RUN \
+ apt update -y && apt upgrade -y && apt install -y vim firefox-esr \
+ && mkdir yn \
+ && cd yn/ \
+ && pip install selenium \
+ && wget https://github.com/mozilla/geckodriver/releases/download/v0.33.0/geckodriver-v0.33.0-linux32.tar.gz \
+ && tar zxf geckodriver-v0.33.0-linux32.tar.gz \
+ && export PATH=$PATH:$PWD 
+
+COPY yn.py /yn/
+
+RUN cd /yn/ && python yn.py
+  

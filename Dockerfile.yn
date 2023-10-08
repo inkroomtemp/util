@@ -1,4 +1,0 @@
-ARG Y_USERNAME
-ARG Y_PASSWORD
-FROM node:18.18.0
-RUN apt update -y && apt upgrade -y && apt install -y git firefox-esr && git clone https://github.com/inkroomtemp/util.git && cd util && npm i && wget https://ghps.cc/https://github.com/mozilla/geckodriver/releases/download/v0.33.0/geckodriver-v0.33.0-linux32.tar.gz && tar -xvf geckodriver-v0.33.0-linux32.tar.gz && node yn.js
