@@ -9,10 +9,9 @@ RUN \
  && cd yn/ \
  && pip install selenium \
  && wget https://github.com/mozilla/geckodriver/releases/download/v0.33.0/geckodriver-v0.33.0-linux32.tar.gz \
- && tar zxf geckodriver-v0.33.0-linux32.tar.gz \
- && export PATH=$PATH:$PWD 
-
+ && tar zxf geckodriver-v0.33.0-linux32.tar.gz 
+ 
 COPY yn.py /yn/
 
-RUN cd /yn/ && python yn.py
+RUN cd /yn/ && export PATH=$PATH:$PWD && python yn.py
   
