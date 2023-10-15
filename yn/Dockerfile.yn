@@ -13,5 +13,5 @@ RUN \
  
 COPY yn.py /yn/
 
-RUN cd /yn/ && export PATH=$PATH:$PWD && python yn.py
+RUN cd /yn/ && export PATH=$PATH:$(pwd) && python3 yn.py
   

@@ -32,6 +32,11 @@ class Test1():
     self.driver.find_element(By.CSS_SELECTOR, "#formSign > div:nth-child(1) > input").send_keys(os.environ.get('Y_USERNAME'))
     self.driver.find_element(By.CSS_SELECTOR, "#formSign > div:nth-child(2) > input").send_keys(os.environ.get('Y_PASSWORD'))
     self.driver.find_element(By.CSS_SELECTOR, "button:nth-child(4)").click()
+    element = WebDriverWait(self.driver, 50, 0.5).until(EC.presence_of_element_located((By.CSS_SELECTOR, ".avatar")))
+    print(element)
+    print("开始睡眠")
+    time.sleep(100)
+    print("睡眠完了")
 
     self.driver.refresh()
     element = self.driver.find_element(By.CSS_SELECTOR,'body')
@@ -39,11 +44,6 @@ class Test1():
     first = self.driver.find_element(By.CSS_SELECTOR, ".upDate:nth-child(1) p")
     actions = ActionChains(self.driver)
     actions.move_to_element(first).click().perform()
-    element = WebDriverWait(self.driver, 50, 0.5).until(EC.presence_of_element_located((By.CSS_SELECTOR, ".avatar")))
-    print("开始睡眠")
-    time.sleep(10)
-    print("睡眠完了")
-
 
     self.vars["win2805"] = self.wait_for_window(2000)
     self.driver.switch_to.window(self.vars["win2805"])
