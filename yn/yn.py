@@ -47,8 +47,19 @@ class Test1():
 
     self.vars["win2805"] = self.wait_for_window(2000)
     self.driver.switch_to.window(self.vars["win2805"])
-    element = self.driver.find_element(By.CSS_SELECTOR,'body')
-    print('result {}'.format(element.text))
+
+    i = 0
+    while i < 10:
+        i += 1
+        time.sleep(100)
+        element = WebDriverWait(self.driver, 500, 0.5).until(EC.presence_of_element_located((By.CSS_SELECTOR, "div:nth-child(9) > .pan:nth-child(1) span")))
+        if element is None:
+          print("null")
+          self.driver.refresh()
+        else:
+          print(element)
+          element = self.driver.find_element(By.CSS_SELECTOR,'body')
+          print('result {}'.format(element.text))
 
 if __name__ == '__main__':
     r = Test1()
