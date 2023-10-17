@@ -60,6 +60,7 @@ class Test1():
           print(element)
           element = self.driver.find_element(By.CSS_SELECTOR,'body')
           print('result {}'.format(element.text))
+          break
 
 if __name__ == '__main__':
     r = Test1()
