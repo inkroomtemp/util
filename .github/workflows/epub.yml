@@ -6,7 +6,7 @@ on:
   workflow_dispatch:
   push:
    paths:
-    - .github/epub.yml
+    - .github/workflows/epub.yml
     - 'epub/**'
 # A workflow run is made up of one or more jobs that can run sequentially or in parallel
 jobs:

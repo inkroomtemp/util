@@ -10,8 +10,7 @@ RUN export DEBIAN_FRONTEND=noninteractive \
 #COPY source.list /etc/apt/sources.list
 RUN #export DEBIAN_FRONTEND=noninteractive && apt update -y && apt upgrade -y
 RUN #sed -i 's/dl-cdn.alpinelinux.org/mirrors.ustc.edu.cn/g' /etc/apk/repositories && apk add vim git zsh openssh-server openssh-client bash wget curl
-RUN apt install -y ssh openssh-client openssh-server vim git zsh pip
-RUN apt install -y curl
+RUN apt install -y ssh openssh-client openssh-server vim git zsh pip curl
 RUN REPO=sjtug/ohmyzsh REMOTE=https://git.sjtu.edu.cn/${REPO}.git sh -c "$(curl -fsSL https://git.sjtu.edu.cn/sjtug/ohmyzsh/-/raw/master/tools/install.sh\?inline\=false)" \
      && sed -i "s@/bin/bash@/bin/zsh@" /etc/passwd \
       && git config --global i18n.logoutputencoding utf-8 \
