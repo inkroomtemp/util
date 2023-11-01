@@ -1,4 +1,4 @@
-name: yn
+name: epub
 
 # Controls when the workflow will run
 on:
@@ -27,6 +27,8 @@ jobs:
           file: epub/Dockerfile
           tags: yn
           labels: yn
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
           outputs: |
             type=local,dest=${{ github.workspace }}/epub.tar
       - name: Upload tar

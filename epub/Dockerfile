@@ -33,9 +33,9 @@ RUN apt install -y software-properties-common
 RUN add-apt-repository ppa:deadsnakes/ppa && echo ok2
 RUN apt install -y python3.12
 RUN update-alternatives --install /usr/bin/python3 python3 /usr/bin/python3.12 1 && update-alternatives --config python3 && python3 --version
-RUN  apt install -y python3.12-venv
+RUN apt install -y python3.12-venv
 RUN apt install -y python3.12-distutils
-RUN cd /app/linovelib2epub/ && python3.12 -m venv venv && chmod +x ./venv/bin/activate && ./venv/bin/activate &&  python3.12 -m pip install -r requirements_dev.txt -i https://mirrors.aliyun.com/pypi/simple && python3.12 -m pip install -e . -i https://mirrors.aliyun.com/pypi/simple
+RUN cd /app/linovelib2epub/ && python3.12 -m venv venv && chmod +x ./venv/bin/activate && ./venv/bin/activate &&  python3.12 -m pip install -r requirements_dev.txt && python3.12 -m pip install -e .
 
 # /usr/sbin/sshd -p 22
 #CMD tail -f /dev/null
