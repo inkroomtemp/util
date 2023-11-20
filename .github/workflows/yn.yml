@@ -3,7 +3,7 @@ name: yn
 # Controls when the workflow will run
 on:
   schedule:
-    - cron: '0 0/6 * * *'
+    - cron: '0 0 * * *'
 
   # Allows you to run this workflow manually from the Actions tab
   workflow_dispatch:
@@ -31,3 +31,12 @@ jobs:
           build-args: |
             Y_USERNAME=${{ secrets.Y_USERNAME }}
             Y_PASSWORD=${{ secrets.Y_PASSWORD }}
+      - name: Retry the workflow
+        if: github.event_name == 'schedule' && failure()
+        run: |
+          curl -i \
+          -X POST \
+          -H "Accept: application/vnd.github.v3+json" \
+          -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" \
+          https://api.github.com/repos/estruyf/doctor/actions/workflows/49809445/dispatches \
+          -d '{"ref": "${{ github.ref }}" }'
