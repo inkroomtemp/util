@@ -34,9 +34,4 @@ jobs:
       - name: Retry the workflow
         if: github.event_name == 'schedule' && failure()
         run: |
-          curl -i \
-          -X POST \
-          -H "Accept: application/vnd.github.v3+json" \
-          -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" \
-          https://api.github.com/repos/estruyf/doctor/actions/workflows/49809445/dispatches \
-          -d '{"ref": "${{ github.ref }}" }'
+          gh workflow run yn.yml
