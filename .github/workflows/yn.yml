@@ -33,5 +33,7 @@ jobs:
             Y_PASSWORD=${{ secrets.Y_PASSWORD }}
       - name: Retry the workflow
         if: github.event_name == 'schedule' && failure()
+        env:
+          GH_TOKEN: ${{ github.token }}
         run: |
           gh workflow run yn.yml
