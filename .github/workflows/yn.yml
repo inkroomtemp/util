@@ -2,8 +2,8 @@ name: yn
 
 # Controls when the workflow will run
 on:
-#  schedule:
-#    - cron: '0 0 * * *'
+  schedule:
+    - cron: '0 0 * * *'
 
   # Allows you to run this workflow manually from the Actions tab
   workflow_dispatch:
@@ -24,7 +24,7 @@ jobs:
         uses: docker/build-push-action@v4
         with:
           context: yn
-          file: yn/Dockerfile.yn
+          file: yn/Dockerfile.node
           push: false
           tags: yn
           labels: yn
