@@ -32,7 +32,7 @@ jobs:
             Y_USERNAME=${{ secrets.Y_USERNAME }}
             Y_PASSWORD=${{ secrets.Y_PASSWORD }}
       - name: Retry the workflow
-        if: failure()
+        if: github.event_name == 'schedule' && failure()
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
