@@ -151,14 +151,13 @@ jobs:
             RUST_VERSION=${{ needs.version.outputs.ve }}
       - name: Export digest
         run: |
-          mkdir -p /tmp/digests
           digest="${{ steps.build.outputs.digest }}"
-          touch "/tmp/digests/${digest#sha256:}"
+          echo "${digest#sha256:}" > ${{ steps.arch.outputs.arch }}.sha
       - name: Upload digest
         uses: actions/upload-artifact@v4
         with:
-          name: digests
-          path: /tmp/digests/*
+          name: ${{ steps.arch.outputs.arch }}
+          path: ${{ steps.arch.outputs.arch }}.sha
           if-no-files-found: error
           retention-days: 1
   combine:
@@ -171,7 +170,7 @@ jobs:
       - name: Download digests
         uses: actions/download-artifact@v4
         with:
-          name: digests
+          pattern: '*.sha'
           path: /tmp/digests
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
@@ -201,6 +200,7 @@ jobs:
       - name: Create manifest list and push
         working-directory: /tmp/digests
         run: |
+          ls -1 | while read file ; do touch $(cat $file) && rm -f $file ; done
           tree /tmp/digests
           docker buildx imagetools create $(jq -cr '.tags | map("-t " + .) | join(" ")' <<< "$DOCKER_METADATA_OUTPUT_JSON") $(printf '${{ secrets.DOCKER_HUB_USERNAME }}/rust@sha256:%s ' *)
           echo "-------------ghcr-----------"
