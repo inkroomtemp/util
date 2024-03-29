@@ -20,17 +20,35 @@ jobs:
       # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
       - name: Checkout
         uses: actions/checkout@v4
+      - name: Cache
+        id: cache
+        uses: actions/cache@v3
+        with:
+          # npm cache files are stored in `~/.npm` on Linux/macOS
+          path: ${{ github.workspace }}/image.tar
+          key: yn
       - name: Build Docker Image
         uses: docker/build-push-action@v5
+        if: ${{ steps.cache.outputs.cache-hit != 'true' }}
         with:
           context: yn
           file: yn/Dockerfile.node
           push: false
+          load: true
           tags: yn
           labels: yn
           build-args: |
             Y_USERNAME=${{ secrets.Y_USERNAME }}
             Y_PASSWORD=${{ secrets.Y_PASSWORD }}
+      - name: Build Docker Image
+        if: ${{ steps.cache.outputs.cache-hit != 'true' }}
+        run: |
+          docker save yn -o ${{ github.workspace }}/image.tar
+      - name: Run Docker Image
+        if: ${{ steps.cache.outputs.cache-hit == 'true' }}
+        run: |
+          docker load -i -q ${{ github.workspace }}/image.tar
+          docker run --rm -w /util/yn -e Y_USERNAME=${{ secrets.Y_USERNAME }} -e Y_PASSWORD=${{ secrets.Y_PASSWORD }} yn node yn.js
       - name: Retry the workflow
         if: github.event_name == 'schedule' && failure()
         env:
