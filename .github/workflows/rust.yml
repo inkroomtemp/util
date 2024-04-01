@@ -88,8 +88,7 @@ jobs:
         with:
           context: .
           file: rust/Dockerfile.musl
-          push: false
-          load: true
+          push: true
           platforms: |
             linux/386
             linux/amd64
