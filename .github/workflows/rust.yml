@@ -81,17 +81,43 @@ jobs:
           registry: ghcr.io
           username: ${{ github.repository_owner }}
           password: ${{ secrets.GITHUB_TOKEN }}
-      - name: Push musl Image
+      - name: Build musl Image
         uses: docker/build-push-action@v5
         with:
           context: .
-          file: Dockerfile.musl
-          push: true
+          file: rust/Dockerfile.musl
+          push: false
+          load: true
+          platforms: |
+            linux/386
+            linux/amd64
+            linux/arm/v7
+            linux/arm64
           tags: |
             ghcr.io/${{ github.repository_owner }}/rust_musl_build:latest
             ghcr.io/${{ github.repository_owner }}/rust_musl_build:${{  needs.version.outputs.buildVve }}
           github-token: ${{ secrets.GITHUB_TOKEN }}
-
+          build-args: |
+            RUST_VERSION=${{ needs.version.outputs.ve }}
+      - name: Test musl Image
+        uses: docker/build-push-action@v5
+        with:
+          context: rust
+          file: rust/Dockerfile.test
+          push: false
+          load: false
+          platforms: |
+            linux/386
+            linux/amd64
+            linux/arm/v7
+            linux/arm64
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          build-args: |
+            IMAGE=ghcr.io/${{ github.repository_owner }}/rust_musl_build:latest
+      - name: Push musl Image
+        run: |
+            docker push ghcr.io/${{ github.repository_owner }}/rust_musl_build:latest
+            docker push ghcr.io/${{ github.repository_owner }}/rust_musl_build:${{  needs.version.outputs.buildVve }}
   dev:
     runs-on: ubuntu-20.04
     permissions: write-all

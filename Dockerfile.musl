@@ -1,3 +1,0 @@
-FROM registry.gitlab.com/rust_musl_docker/image:stable-latest
-RUN apt update -y && apt upgrade -y && apt install -y mingw-w64 && rustup target add x86_64-pc-windows-gnu
-
