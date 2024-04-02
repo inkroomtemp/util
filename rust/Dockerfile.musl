@@ -1,6 +1,6 @@
 FROM debian:buster
 ARG RUST_VERSION
-RUN arch && sed -i 's/deb.debian.org/mirrors.ustc.edu.cn/g' /etc/apt/sources.list && apt update -y && apt install -y musl-dev \
+RUN arch && echo "uname=$(uname -a)" && echo "-p=$(uname -p)" && sed -i 's/deb.debian.org/mirrors.ustc.edu.cn/g' /etc/apt/sources.list && apt update -y && apt install -y musl-dev \
   musl-tools \
   file \
   nano \
