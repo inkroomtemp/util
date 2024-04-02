@@ -73,6 +73,7 @@ jobs:
     outputs:
       dev_arch: ${{ steps.arch.outputs.dev_arch }}
       musl_arch: ${{ steps.arch.outputs.musl_arch }}
+      musl_arch_raw: ${{ steps.arch.outputs.musl_arch_raw }}
     steps:
       - name: arch
         id: arch
@@ -80,7 +81,10 @@ jobs:
           dev_arch=$(curl -sL https://hub.docker.com/v2/namespaces/library/repositories/rust/tags/${{ needs.version.outputs.ve }}-slim-bullseye | jq -c '[.images[] | select(.architecture!="unknown") | select (.architecture!="ppc64le") | select(.os!="unknown") | .os + "/" + .architecture]')
           echo "dev_arch=$dev_arch"
           musl_arch=$(curl -sL https://hub.docker.com/v2/namespaces/library/repositories/debian/tags/buster | jq -c '[.images[] | select(.architecture!="unknown") | select(.architecture!="386") | select(.architecture!="arm") | select(.os!="unknown") | .os + "/" + .architecture]')
+          musl_arch_raw=$(curl -sL https://hub.docker.com/v2/namespaces/library/repositories/debian/tags/buster | jq -c --raw-output '[.images[] | select(.architecture!="unknown") | select(.architecture!="386") | select(.architecture!="arm") | select(.os!="unknown") | .os + "/" + .architecture] | join(",")')
           echo "musl_arch=$musl_arch"
+          echo "musl_arch_raw=$musl_arch_raw"
+          echo "musl_arch_raw=$musl_arch_raw" >> $GITHUB_OUTPUT
           echo "dev_arch=$dev_arch" >> $GITHUB_OUTPUT
           echo "musl_arch=$musl_arch" >> $GITHUB_OUTPUT
 
@@ -116,14 +120,17 @@ jobs:
           build-args: |
             RUST_VERSION=${{ needs.version.outputs.ve }}
       - name: Export digest
+        id: export
         run: |
           mkdir -p /tmp/digests
           digest="${{ steps.build.outputs.digest }}"
           touch "/tmp/digests/${digest#sha256:}"
+          arch="${{ matrix.platform }}"
+          echo "arch=${arch//\//-}" >> $GITHUB_OUTPUT
       - name: Upload digest
         uses: actions/upload-artifact@v4
         with:
-          name: musl-digests-${{ matrix.platform }}
+          name: musl-digests-${{ steps.export.outputs.export }}
           path: /tmp/digests/*
           if-no-files-found: error
           retention-days: 1
@@ -131,7 +138,7 @@ jobs:
   musl-combile:
     runs-on: ubuntu-20.04
     permissions: write-all
-    needs: [musl]
+    needs: [arch, musl]
     steps:
       - name: Download digests
         uses: actions/download-artifact@v4
@@ -155,10 +162,7 @@ jobs:
           file: rust/Dockerfile.test
           push: false
           load: false
-          platforms: |
-            linux/amd64
-            linux/arm/v7
-            linux/arm64
+          platforms: ${{ needs.arch.outputs.musl_arch_raw }}
           github-token: ${{ secrets.GITHUB_TOKEN }}
           build-args: |
             IMAGE=ghcr.io/${{ github.repository_owner }}/rust_musl_build:latest
