@@ -79,7 +79,7 @@ jobs:
         run: |
           dev_arch=$(curl -sL https://hub.docker.com/v2/namespaces/library/repositories/rust/tags/${{ needs.version.outputs.ve }}-slim-bullseye | jq -c '[.images[] | select(.architecture!="unknown") | select (.architecture!="ppc64le") | select(.os!="unknown") | .os + "/" + .architecture]')
           echo "dev_arch=$dev_arch"
-          musl_arch=$(curl -sL https://hub.docker.com/v2/namespaces/library/repositories/debian/tags/buster | jq -c '[.images[] | select(.architecture!="unknown") | select(.architecture!="386") | select(.os!="unknown") | .os + "/" + .architecture]')
+          musl_arch=$(curl -sL https://hub.docker.com/v2/namespaces/library/repositories/debian/tags/buster | jq -c '[.images[] | select(.architecture!="unknown") | select(.architecture!="386") | select(.architecture!="arm") | select(.os!="unknown") | .os + "/" + .architecture]')
           echo "musl_arch=$musl_arch"
           echo "dev_arch=$dev_arch" >> $GITHUB_OUTPUT
           echo "musl_arch=$musl_arch" >> $GITHUB_OUTPUT
