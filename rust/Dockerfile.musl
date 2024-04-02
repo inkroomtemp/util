@@ -18,7 +18,7 @@ RUN arch && echo "uname=$(uname -a)" && echo "-p=$(uname -p)" && echo "dpkg=$(dp
   --no-install-recommends && \
   ln -s /usr/bin/musl-gcc /usr/bin/$(arch)-linux-musl-gcc && \
   apt search linux-headers && \
-  if [ "$(dpkg --print-architecture)" = "amd64" ]; then apt install -y linux-headers-amd64 ; fi && \
+  if [ "$(dpkg --print-architecture)" = "amd64" ]; then apt install -y linux-headers-$(dpkg --print-architecture) ; fi && \
   rm -rf /var/lib/apt/lists/*
 
 ARG OPENSSL_VER=1.1.1s
@@ -28,9 +28,9 @@ WORKDIR /libworkdir
 # OpenSSL 1.1 needs some linux headers to exists. They aren't installed by
 # default to the directory of musl includes, so we must link them.
 # OpenSSL 1.0 doesn't need these, but they won't do any harm.
-RUN if [ -d "/usr/include/asm-generic" ]; then  ln -s /usr/include/asm-generic /usr/include/$(arch)-linux-musl/asm-generic ; fi && \
-    if [ -d "/usr/include/linux" ]; then ln -s /usr/include/linux /usr/include/$(arch)-linux-musl/linux ; fi && \
-    if [ -d "/usr/include/$(arch)-linux-gnu/asm" ]; then ln -s /usr/include/$(arch)-linux-gnu/asm /usr/include/$(arch)-linux-musl/asm ; fi && \
+RUN if [ -d "/usr/include/asm-generic" ]; then mkdir -p /usr/include/$(arch)-linux-musl && ln -s /usr/include/asm-generic /usr/include/$(arch)-linux-musl/asm-generic ; fi && \
+    if [ -d "/usr/include/linux" ]; then mkdir -p /usr/include/$(arch)-linux-musl/ && ln -s /usr/include/linux /usr/include/$(arch)-linux-musl/linux ; fi && \
+    if [ -d "/usr/include/$(arch)-linux-gnu/asm" ]; then mkdir -p /usr/include/$(arch)-linux-musl && ln -s /usr/include/$(arch)-linux-gnu/asm /usr/include/$(arch)-linux-musl/asm ; fi && \
     mkdir /workdir && mkdir $MUSL_PREFIX && \
     curl -sL https://www.openssl.org/source/openssl-${OPENSSL_VER}.tar.gz | tar xz && cd openssl-${OPENSSL_VER} &&  \
     CC="musl-gcc -fPIE -pie" LDFLAGS="-L/musl/lib/" CFLAGS="-I/musl/include" NO_FUZZ_TESTS="1" ./Configure no-unit-test no-asm  no-shared no-ssl2 no-ssl3 no-idea no-dtls no-dtls1 no-srp no-async --prefix=${MUSL_PREFIX} --openssldir=${MUSL_PREFIX}/ssl linux-$(arch) && \
