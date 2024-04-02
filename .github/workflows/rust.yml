@@ -69,12 +69,16 @@ jobs:
   arch: 
     runs-on: ubuntu-20.04
     needs: [version]
+    outputs:
+      dev_arch: ${{ steps.arch.outputs.dev_arch }}
+      musl_arch: ${{ steps.arch.outputs.musl_arch }}
     steps:
       - name: arch
+        id: arch
         run: |
-          dev_arch=$(curl -sL https://hub.docker.com/v2/namespaces/library/repositories/rust/tags/${{ needs.version.outputs.ve }}-slim-bullseye | jq -c '[.images[].architecture | select (.!="unknown") | select(.!="ppc64le")]')
+          dev_arch=$(curl -sL https://hub.docker.com/v2/namespaces/library/repositories/rust/tags/${{ needs.version.outputs.ve }}-slim-bullseye | jq -c '[.images[] | select(.architecture!="unknown") | select (.architecture!="ppc64le") | select(.os!="unknown") | .os + "/" + .architecture]')
           echo "dev_arch=$dev_arch"
-          musl_arch=$(curl -sL https://hub.docker.com/v2/namespaces/library/repositories/debian/tags/buster | jq -c '[.images[].architecture | select (.!="unknown")]')
+          musl_arch=$(curl -sL https://hub.docker.com/v2/namespaces/library/repositories/debian/tags/buster | jq -c '[.images[] | select(.architecture!="unknown") | select(.os!="unknown") | .os + "/" + .architecture]')
           echo "musl_arch=$musl_arch"
           echo "dev_arch=$dev_arch" >> $GITHUB_OUTPUT
           echo "musl_arch=$musl_arch" >> $GITHUB_OUTPUT
