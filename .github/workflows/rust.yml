@@ -91,7 +91,7 @@ jobs:
         with:
           context: .
           file: rust/Dockerfile.musl
-          push: true
+          outputs: type=image,name=${{ secrets.DOCKER_HUB_USERNAME }}/rust,push-by-digest=true,name-canonical=true,push=true
           platforms: ${{ matrix.platform }}
           github-token: ${{ secrets.GITHUB_TOKEN }}
           build-args: |
@@ -112,9 +112,7 @@ jobs:
   musl-combile:
     runs-on: ubuntu-20.04
     permissions: write-all
-    needs: [version, musl]
-    # 使用 manifest 合并会报  is a manifest list  可能跟qemu buildx 有关，所以换种方案
-    if: needs.version.outputs.u == 'true'
+    needs: [musl]
     steps:
       - name: Download digests
         uses: actions/download-artifact@v4
