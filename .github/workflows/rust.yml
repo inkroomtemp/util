@@ -66,12 +66,25 @@ jobs:
             echo "u=true" >> $GITHUB_OUTPUT
             echo "ve=$ve" >> $GITHUB_OUTPUT
           fi
-  musl:
+  arch: 
     runs-on: ubuntu-20.04
     needs: [version]
+    steps:
+      - name: arch
+        run: |
+          dev_arch=$(curl -sL https://hub.docker.com/v2/namespaces/library/repositories/rust/tags/${{ needs.version.outputs.ve }}-slim-bullseye | jq -c '[.images[].architecture | select (.!="unknown") | select(.!="ppc64le")]')
+          echo "dev_arch=$dev_arch"
+          musl_arch=$(curl -sL https://hub.docker.com/v2/namespaces/library/repositories/debian/tags/buster | jq -c '[.images[].architecture | select (.!="unknown")]')
+          echo "musl_arch=$musl_arch"
+          echo "dev_arch=$dev_arch" >> $GITHUB_OUTPUT
+          echo "musl_arch=$musl_arch" >> $GITHUB_OUTPUT
+
+  musl:
+    runs-on: ubuntu-20.04
+    needs: [version, arch]
     strategy:
       matrix:
-        platform: [linux/386, linux/amd64, linux/arm/v7, linux/arm64]
+        platform: ${{ fromJSON( needs.arch.outputs.musl_arch ) }}
     if: needs.version.outputs.buildVu == 'true'
     steps:
       - name: Checkout repository
@@ -137,7 +150,6 @@ jobs:
           push: false
           load: false
           platforms: |
-            linux/386
             linux/amd64
             linux/arm/v7
             linux/arm64
@@ -160,11 +172,11 @@ jobs:
   dev:
     runs-on: ubuntu-20.04
     permissions: write-all
-    needs: [version]
+    needs: [version, arch]
     if: needs.version.outputs.u == 'true'
     strategy:
       matrix:
-        platform: [linux/386, linux/amd64, linux/arm/v7, linux/arm64]
+        platform: ${{ fromJSON( needs.arch.outputs.dev_arch ) }}
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
