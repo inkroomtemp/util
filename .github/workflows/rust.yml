@@ -69,6 +69,9 @@ jobs:
   musl:
     runs-on: ubuntu-20.04
     needs: [version]
+    strategy:
+      matrix:
+        platform: [linux/386, linux/amd64, linux/arm/v7, linux/arm64]
     if: needs.version.outputs.buildVu == 'true'
     steps:
       - name: Checkout repository
@@ -89,17 +92,45 @@ jobs:
           context: .
           file: rust/Dockerfile.musl
           push: true
-          platforms: |
-            linux/386
-            linux/amd64
-            linux/arm/v7
-            linux/arm64
-          tags: |
-            ghcr.io/${{ github.repository_owner }}/rust_musl_build:latest
-            ghcr.io/${{ github.repository_owner }}/rust_musl_build:${{  needs.version.outputs.buildVve }}
+          platforms: ${{ matrix.platform }}
           github-token: ${{ secrets.GITHUB_TOKEN }}
           build-args: |
             RUST_VERSION=${{ needs.version.outputs.ve }}
+      - name: Export digest
+        run: |
+          mkdir -p /tmp/digests
+          digest="${{ steps.build.outputs.digest }}"
+          touch "/tmp/digests/${digest#sha256:}"
+      - name: Upload digest
+        uses: actions/upload-artifact@v4
+        with:
+          name: musl-digests-${{ steps.arch.outputs.arch }}
+          path: /tmp/digests/*
+          if-no-files-found: error
+          retention-days: 1
+
+  musl-combile:
+    runs-on: ubuntu-20.04
+    permissions: write-all
+    needs: [version, musl]
+    # 使用 manifest 合并会报  is a manifest list  可能跟qemu buildx 有关，所以换种方案
+    if: needs.version.outputs.u == 'true'
+    steps:
+      - name: Download digests
+        uses: actions/download-artifact@v4
+        with:
+          pattern: musl-digests-*
+          path: /tmp/digests
+          merge-multiple: true
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+      - name: Log in to the Container registry
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.repository_owner }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
       - name: Test musl Image
         uses: docker/build-push-action@v5
         with:
@@ -115,10 +146,19 @@ jobs:
           github-token: ${{ secrets.GITHUB_TOKEN }}
           build-args: |
             IMAGE=ghcr.io/${{ github.repository_owner }}/rust_musl_build:latest
-      - name: Push musl Image
+      - name: Create manifest list and push
+        working-directory: /tmp/digests
         run: |
-            docker push ghcr.io/${{ github.repository_owner }}/rust_musl_build:latest
-            docker push ghcr.io/${{ github.repository_owner }}/rust_musl_build:${{  needs.version.outputs.buildVve }}
+          tree /tmp/digests
+          docker buildx imagetools create $(jq -cr '.tags | map("-t " + .) | join(" ")' <<< "$DOCKER_METADATA_OUTPUT_JSON") $(printf 'ghcr.io/${{ github.repository_owner }}/rust_musl_build@sha256:%s ' *)
+          docker buildx imagetools create \
+            --tag ghcr.io/${{ github.repository_owner }}/rust_musl_build:latest \
+            ghcr.io/${{ github.repository_owner }}/rust_musl_build:${{ needs.version.outputs.ve }}
+
+      - name: Inspect image
+        run: |
+          docker buildx imagetools inspect ghcr.io/${{ github.repository_owner }}/rust_musl_build:${{ needs.version.outputs.ve }}
+
   dev:
     runs-on: ubuntu-20.04
     permissions: write-all
