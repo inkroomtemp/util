@@ -32,35 +32,35 @@ jobs:
             echo "暂无最新版本"
             echo "u=false" >> $GITHUB_OUTPUT
           fi
-          d=$(docker run --rm ghcr.io/${{ github.repository_owner }}/rust:latest rustc --version || echo "null")
+          d=$(docker run --rm ghcr.io/${{ github.repository_owner }}/rust:latest rustc --version || echo "rustc null")
           echo "docker version=$d"
           echo "latest version=$ve"
+          ve=$(echo $ve | awk '{print $2}')
+          d=$(echo $d | awk '{print $2}')
           echo "ve=$ve" >> $GITHUB_OUTPUT
           if [[ "$d" =~ "$ve"  ]]; then
             echo "已是最新版本"
             echo "u=false" >> $GITHUB_OUTPUT
           else 
-            ve=$(echo $ve | awk '{split($0,arr);print arr[2]}')
             echo "最新版本 $ve"
             echo "u=true" >> $GITHUB_OUTPUT
           fi
       - name: Rust Build Latest Version
         id: buildV
-        run: |
-          ve=$(docker run --rm registry.gitlab.com/rust_musl_docker/image:stable-latest rustc --version)
-          ve=$(echo $ve | awk '{split($0,arr);print arr[2]}')
-          if [[ $ve == "null" ]]
+        run: | 
+          d=$(docker run --rm ghcr.io/${{ github.repository_owner }}/rust_musl_build:latest rustc --version || echo "rustc null")
+          d=$(echo $d | awk '{print $2}')
+          if [[ $d == "null" ]]
           then 
             echo "暂无最新版本"
+            echo "ve=${{ steps.v.outputs.ve }}" >> $GITHUB_OUTPUT
             echo "u=false" >> $GITHUB_OUTPUT
           fi
-          d=$(docker run --rm ghcr.io/${{ github.repository_owner }}/rust_musl_build:latest rustc --version || echo "null")
-          d=$(echo $d | awk '{split($0,arr);print arr[2]}')
           echo "docker version=$d"
-          echo "latest version=$ve"
-          echo "ve=$ve" >> $GITHUB_OUTPUT
-          if [[ "$d" =~ "$ve"  ]]; then
-            echo "已是最新版本"
+          echo "latest version=${{ steps.v.outputs.ve }}"
+          echo "ve=$d" >> $GITHUB_OUTPUT
+          if [[ "$d" =~ "${{ steps.v.outputs.ve }}"  ]]; then
+            echo "已是最新版本 $ve"
             echo "u=false" >> $GITHUB_OUTPUT
           else 
             echo "最新版本 $ve"
