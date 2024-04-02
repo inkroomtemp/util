@@ -18,7 +18,7 @@ RUN arch && echo "uname=$(uname -a)" && echo "-p=$(uname -p)" && echo "dpkg=$(dp
   --no-install-recommends && \
   ln -s /usr/bin/musl-gcc /usr/bin/$(arch)-linux-musl-gcc && \
   apt search linux-headers && \
-  if [ "$(arch)" = "x86_64" ]; then apt install -y linux-headers-amd64 ; fi && \
+  if [ "$(dpkg --print-architecture)" = "amd64" ]; then apt install -y linux-headers-amd64 ; fi && \
   rm -rf /var/lib/apt/lists/*
 
 ARG OPENSSL_VER=1.1.1s
