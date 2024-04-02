@@ -58,5 +58,5 @@ ENV PATH=/root/.cargo/bin:$MUSL_PREFIX/bin:$PATH \
     RUST_VERSION=${RUST_VERSION}
 
 
-RUN curl https://sh.rustup.rs -sSf | sh -s -- -y --default-toolchain $RUST_VERSION && rustup target add $(arch)-unknown-linux-musl && if [ $(arch) = "x86_64" ] ; then apt update -y && apt search mingw && apt install -y mingw-w64 apt install -y mingw-w64 && rustup target add x86_64-pc-windows-gnu ; fi
+RUN curl https://sh.rustup.rs -sSf | sh -s -- -y --default-toolchain $RUST_VERSION && rustup target add $(arch)-unknown-linux-musl && if [ $(arch) = "x86_64" ] ; then apt update -y && apt search mingw && apt install -y mingw-w64 && rustup target add x86_64-pc-windows-gnu ; fi
 WORKDIR /app
