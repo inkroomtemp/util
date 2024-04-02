@@ -27,7 +27,7 @@ WORKDIR /libworkdir
 # default to the directory of musl includes, so we must link them.
 # OpenSSL 1.0 doesn't need these, but they won't do any harm.
 RUN if [ -f "/usr/include/asm-generic" ]; then  ln -s /usr/include/asm-generic /usr/include/$(arch)-linux-musl/asm-generic ; fi && \
-    if [ -f "/usr/include/$(arch)-linux-musl/linux" ]; then ln -s /usr/include/linux /usr/include/$(arch)-linux-musl/linux fi && \
+    if [ -f "/usr/include/$(arch)-linux-musl/linux" ]; then ln -s /usr/include/linux /usr/include/$(arch)-linux-musl/linux ; fi && \
     mkdir /workdir && mkdir $MUSL_PREFIX && \
     curl -sL https://www.openssl.org/source/openssl-${OPENSSL_VER}.tar.gz | tar xz && cd openssl-${OPENSSL_VER} &&  \
     CC="musl-gcc -fPIE -pie" LDFLAGS="-L/musl/lib/" CFLAGS="-I/musl/include" NO_FUZZ_TESTS="1" ./Configure no-unit-test no-asm  no-shared no-ssl2 no-ssl3 no-idea no-dtls no-dtls1 no-srp no-async --prefix=${MUSL_PREFIX} --openssldir=${MUSL_PREFIX}/ssl linux-$(arch) && \
