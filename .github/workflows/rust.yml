@@ -114,7 +114,7 @@ jobs:
         with:
           context: .
           file: rust/Dockerfile.musl
-          outputs: type=image,name=ghcr.io/${{ github.repository_owner }}/rust,push-by-digest=true,name-canonical=true,push=true
+          outputs: type=image,name=ghcr.io/${{ github.repository_owner }}/rust_musl_build,push-by-digest=true,name-canonical=true,push=true
           platforms: ${{ matrix.platform }}
           github-token: ${{ secrets.GITHUB_TOKEN }}
           build-args: |
