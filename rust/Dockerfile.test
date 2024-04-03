@@ -2,6 +2,6 @@ ARG IMAGE
 FROM $IMAGE
 COPY app /app/
 WORKDIR /app/
-RUN ls && cargo build -vv --release --target=$(arch)-unknown-linux-musl && ldd target/$(arch)-unknown-linux-musl/release/app || true && chmod +x target/$(arch)-unknown-linux-musl/release/app && ./target/$(arch)-unknown-linux-musl/release/ap
+RUN ls && cargo build -vv --release --target=$(arch)-unknown-linux-musl && (ldd target/$(arch)-unknown-linux-musl/release/app || true) && chmod +x target/$(arch)-unknown-linux-musl/release/app && ./target/$(arch)-unknown-linux-musl/release/app
 
 

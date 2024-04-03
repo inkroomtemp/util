@@ -1,10 +1,10 @@
 use std::collections::HashMap;
 
 #[tokio::main]
-async fn main() -> Result<(),dyn std::error::Error>>{
-    let resp = request::get("https://httpbin.org/ip")
+async fn main() -> Result<(), Box<dyn std::error::Error>> {
+    let resp = reqwest::get("https://httpbin.org/ip")
         .await?
-        .json::<HashMap<string,String>>()
+        .json::<HashMap<String, String>>()
         .await?;
     println!("{resp:#?}");
     Ok(())
