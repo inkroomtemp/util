@@ -156,6 +156,22 @@ jobs:
           registry: ghcr.io
           username: ${{ github.repository_owner }}
           password: ${{ secrets.GITHUB_TOKEN }}
+      - name: Docker meta
+        id: meta
+        uses: docker/metadata-action@v5
+        with:
+          images: |
+            ghcr.io/${{ github.repository_owner }}/rust_musl_build
+          tags: |
+            type=raw,value=beta
+          labels: |
+            org.opencontainers.image.description=rust构建环境-${{ needs.version.outputs.ve }}
+            org.opencontainers.image.title=rust_musl_build-${{ needs.version.outputs.ve }}
+      - name: Push Beta Image
+        working-directory: /tmp/digests
+        run: |
+          tree /tmp/digests
+          docker buildx imagetools create $(jq -cr '.tags | map("-t " + .) | join(" ")' <<< "$DOCKER_METADATA_OUTPUT_JSON") $(printf 'ghcr.io/${{ github.repository_owner }}/rust_musl_build@sha256:%s ' *)
 
       - name: Test musl Image
         uses: docker/build-push-action@v5
@@ -167,20 +183,14 @@ jobs:
           platforms: ${{ needs.arch.outputs.musl_arch_raw }}
           github-token: ${{ secrets.GITHUB_TOKEN }}
           build-args: |
-            IMAGE=ghcr.io/${{ github.repository_owner }}/rust_musl_build:latest
-      - name: Create manifest list and push
-        working-directory: /tmp/digests
+            IMAGE=ghcr.io/${{ github.repository_owner }}/rust_musl_build:beta
+      - name: Inspect Image And Push Release Image
         run: |
-          tree /tmp/digests
-          docker buildx imagetools create $(jq -cr '.tags | map("-t " + .) | join(" ")' <<< "$DOCKER_METADATA_OUTPUT_JSON") $(printf 'ghcr.io/${{ github.repository_owner }}/rust_musl_build@sha256:%s ' *)
           docker buildx imagetools create \
             --tag ghcr.io/${{ github.repository_owner }}/rust_musl_build:latest \
-            ghcr.io/${{ github.repository_owner }}/rust_musl_build:${{ needs.version.outputs.ve }}
-
-      - name: Inspect image
-        run: |
+            --tag ghcr.io/${{ github.repository_owner }}/rust_musl_build:${{ needs.version.outputs.ve }} \
+            ghcr.io/${{ github.repository_owner }}/rust_musl_build:beta
           docker buildx imagetools inspect ghcr.io/${{ github.repository_owner }}/rust_musl_build:${{ needs.version.outputs.ve }}
-
   dev:
     runs-on: ubuntu-20.04
     permissions: write-all
