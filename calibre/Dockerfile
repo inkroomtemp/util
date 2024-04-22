@@ -22,3 +22,5 @@ ENV PKG_CONFIG_PATH $SW/lib/pkgconfig
 ENV QMAKE $SW/qt/bin/qmake
 ENV CALIBRE_QT_PREFIX $SW/qt
 RUN ls $SW && python ./setup.py bootstrap
+RUN python setup.py build_dep linux && ls bypy/b/linux/
+RUN python setup.py linux && ls dist

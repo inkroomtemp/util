@@ -32,5 +32,7 @@ jobs:
           push: false
           file: calibre/Dockerfile
           github-token: ${{ secrets.GITHUB_TOKEN }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
 
       
