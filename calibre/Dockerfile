@@ -5,6 +5,6 @@ WORKDIR /app
 RUN git clone https://github.com/kovidgoyal/bypy.git
 RUN git clone https://github.com/kovidgoyal/calibre.git
 WORKDIR /app/calibre
-RUN apt install -y libnss3-dev libxcomposite-dev && python ./setup/unix-ci.py install
+RUN apt install -y libnss3-dev libxcomposite-dev libxdamage-dev && python ./setup/unix-ci.py install
 RUN python ./setup/unix-ci.py bootstrap && env
 RUN python ./setup.py bootstrap
