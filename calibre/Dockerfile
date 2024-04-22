@@ -5,8 +5,8 @@ WORKDIR /app
 RUN git clone https://github.com/kovidgoyal/bypy.git
 RUN git clone https://github.com/kovidgoyal/calibre.git
 WORKDIR /app/calibre
-RUN adduser calibre
-ENV USER calibre
+# RUN adduser calibre
+ENV USER root
 # 解决 构建过程中要求不使用root
 ENV QTWEBENGINE_DISABLE_SANDBOX 1
 RUN apt install -y libnss3-dev libxcomposite-dev libxdamage-dev libx11-dev libxtst-dev libxrandr-dev libxkbfile-dev && python ./setup/unix-ci.py install
