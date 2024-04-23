@@ -30,9 +30,19 @@ jobs:
         with:
           context: calibre
           push: false
+          load: true
           file: calibre/Dockerfile
           github-token: ${{ secrets.GITHUB_TOKEN }}
           cache-from: type=gha
           cache-to: type=gha,mode=max
-
+      - name: Export
+        run: |
+          image_id="${{ steps.build.outputs.imageid }}"
+          image_id=${image_id:7}
+          docker save -o image.tar $image_id
+      - name: Upload artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: image
+          path: image.tar
       
