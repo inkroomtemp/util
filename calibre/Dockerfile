@@ -23,7 +23,7 @@ ENV CALIBRE_QT_PREFIX $SW/qt
 RUN ls $SW && python ./setup.py bootstrap
 # 因为修改了环境变量，所以使用python已经不是镜像里原本的那个了，pip也就对不上，需要重新安装一份
 RUN curl -sL https://bootstrap.pypa.io/get-pip.py -o get-pip.py && python get-pip.py && rm -f get-pip.py && python -m pip install pyyaml
-
+RUN echo "import ssl" >> s.py && echo "ssl._create_default_https_context = ssl._create_unverified_context" >> s.py && cat ../bypy/bypy/chroot.py >> s.py && mv s.py ../bypy/bypy/chroot.py && cat ../bypy/bypy/chroot.py
 #RUN pip install yaml && cd ../bypy && pip install yaml
 RUN python ../bypy/ linux --arch 64 vm
 RUN python setup.py build_dep linux && ls bypy/b/linux/
