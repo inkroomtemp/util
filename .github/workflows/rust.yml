@@ -39,8 +39,8 @@ jobs:
           d=$(echo $d | awk '{print $2}')
           echo "ve=$ve" >> $GITHUB_OUTPUT
           if [[ "$d" =~ "$ve"  ]]; then
-            echo "已是最新版本"
-            echo "u=false" >> $GITHUB_OUTPUT
+            echo "已是最新版本 $ve"      
+            echo "u=true" >> $GITHUB_OUTPUT
           else 
             echo "最新版本 $ve"
             echo "u=true" >> $GITHUB_OUTPUT
@@ -74,6 +74,7 @@ jobs:
       dev_arch: ${{ steps.arch.outputs.dev_arch }}
       musl_arch: ${{ steps.arch.outputs.musl_arch }}
       musl_arch_raw: ${{ steps.arch.outputs.musl_arch_raw }}
+      u: ${{ steps.check.outputs.u }}
     steps:
       - name: arch
         id: arch
@@ -87,6 +88,26 @@ jobs:
           echo "musl_arch_raw=$musl_arch_raw" >> $GITHUB_OUTPUT
           echo "dev_arch=$dev_arch" >> $GITHUB_OUTPUT
           echo "musl_arch=$musl_arch" >> $GITHUB_OUTPUT
+      - name: check
+        id: check
+        run: |
+          if [[ "${{ needs.version.outputs.u }}" =~ "true"  ]]; then
+
+            # 校验 架构
+            cd rust
+            npm i axios cherio
+            arch=$(node checkArch.js '${{ steps.arch.outputs.dev_arch }}')
+            if [[ "$arch" =~ "true"  ]]; then
+              echo '架构一致 ${{ steps.arch.outputs.dev_arch }}'
+              echo "u=false" >> $GITHUB_OUTPUT
+            else 
+              echo '架构遗漏 ${{ steps.arch.outputs.dev_arch }}'
+              echo "u=true" >> $GITHUB_OUTPUT
+            fi
+          else
+            # 版本更新
+            echo "u=true" >> $GITHUB_OUTPUT
+          fi
 
   musl:
     runs-on: ubuntu-20.04
@@ -195,7 +216,7 @@ jobs:
     runs-on: ubuntu-20.04
     permissions: write-all
     needs: [version, arch]
-    if: needs.version.outputs.u == 'true'
+    if: needs.arch.outputs.u == 'true'
     strategy:
       matrix:
         platform: ${{ fromJSON( needs.arch.outputs.dev_arch ) }}
@@ -265,7 +286,7 @@ jobs:
     permissions: write-all
     needs: [version, dev]
     # 使用 manifest 合并会报  is a manifest list  可能跟qemu buildx 有关，所以换种方案
-    if: needs.version.outputs.u == 'true'
+    if: needs.arch.outputs.u == 'true'
     steps:
       - name: Download digests
         uses: actions/download-artifact@v4
