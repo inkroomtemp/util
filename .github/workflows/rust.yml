@@ -76,6 +76,8 @@ jobs:
       musl_arch_raw: ${{ steps.arch.outputs.musl_arch_raw }}
       u: ${{ steps.check.outputs.u }}
     steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
       - name: arch
         id: arch
         run: |
