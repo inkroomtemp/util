@@ -13,8 +13,10 @@ axios.get('https://github.com/inkroomtemp/util/pkgs/container/rust')
     let m = [];
     for(let i = 0;i<m4.length;i++){
         let text = m4.eq(i).text();
-        if(text.indexOf('unknown')==-1)
-        m.push(text)
+        if(text.indexOf('unknown')==-1){
+            if(text=='linux/arm/v7') text = "linux/arm";// docker和github取名不一样，需要适配转换
+            m.push(text)
+        }
     }
 
     if(m.length != now.length){
