@@ -15,7 +15,7 @@ jobs:
     outputs:
       ve: ${{ steps.v.outputs.ve }}
       u: ${{ steps.v.outputs.u }}
-      buildVve: ${{ steps.buildV.outputs.ve }}
+      buildVe: ${{ steps.buildV.outputs.ve }}
       buildVu: ${{ steps.buildV.outputs.u }}
     steps:
       - name: Checkout repository
@@ -47,7 +47,7 @@ jobs:
           fi
       - name: Rust Build Latest Version
         id: buildV
-        run: | 
+        run: |
           d=$(docker run --rm ghcr.io/${{ github.repository_owner }}/rust_musl_build:latest rustc --version || echo "rustc null")
           d=$(echo $d | awk '{print $2}')
           if [[ $d == "null" ]]
@@ -131,6 +131,11 @@ jobs:
           registry: ghcr.io
           username: ${{ github.repository_owner }}
           password: ${{ secrets.GITHUB_TOKEN }}
+      - name: Log in to the Docker Hub
+        uses: docker/login-action@v3
+        with:
+          username: ${{ secrets.DOCKER_HUB_USERNAME }}
+          password: ${{ secrets.DOCKER_HUB_PASSWORD }}
       - name: Build musl Image
         uses: docker/build-push-action@v5
         id: build
@@ -141,7 +146,7 @@ jobs:
           platforms: ${{ matrix.platform }}
           github-token: ${{ secrets.GITHUB_TOKEN }}
           build-args: |
-            RUST_VERSION=${{ needs.version.outputs.ve }}
+            RUST_VERSION=${{ needs.version.outputs.buildVe }}
       - name: Export digest
         id: export
         run: |
@@ -188,8 +193,8 @@ jobs:
           tags: |
             type=raw,value=beta
           labels: |
-            org.opencontainers.image.description=rust构建环境-${{ needs.version.outputs.ve }}
-            org.opencontainers.image.title=rust_musl_build-${{ needs.version.outputs.ve }}
+            org.opencontainers.image.description=rust构建环境-${{ needs.version.outputs.buildVe }}
+            org.opencontainers.image.title=rust_musl_build-${{ needs.version.outputs.buildVe }}
       - name: Push Beta Image
         working-directory: /tmp/digests
         run: |
@@ -211,9 +216,14 @@ jobs:
         run: |
           docker buildx imagetools create \
             --tag ghcr.io/${{ github.repository_owner }}/rust_musl_build:latest \
-            --tag ghcr.io/${{ github.repository_owner }}/rust_musl_build:${{ needs.version.outputs.ve }} \
+            --tag ghcr.io/${{ github.repository_owner }}/rust_musl_build:${{ needs.version.outputs.buildVe }} \
             ghcr.io/${{ github.repository_owner }}/rust_musl_build:beta
-          docker buildx imagetools inspect ghcr.io/${{ github.repository_owner }}/rust_musl_build:${{ needs.version.outputs.ve }}
+          docker buildx imagetools inspect ghcr.io/${{ github.repository_owner }}/rust_musl_build:${{ needs.version.outputs.buildVe }}
+
+          docker buildx imagetools create \
+            --tag ${{ secrets.DOCKER_HUB_USERNAME }}/rust:latest \
+            --tag ${{ secrets.DOCKER_HUB_USERNAME }}/rust:${{ needs.version.outputs.buildVe }} \
+            ghcr.io/${{ github.repository_owne }}/rust:${{ needs.version.outputs.buildVe }}
   dev:
     runs-on: ubuntu-20.04
     permissions: write-all
