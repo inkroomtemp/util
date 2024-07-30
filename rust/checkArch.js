@@ -8,7 +8,7 @@ axios.get('https://github.com/inkroomtemp/util/pkgs/container/rust')
 .then(res=>res.data)
 .then(res=>{
     const $ = cherio.load(res);
-    if(!$('clipboard-copy').textContent.contains(newestVersion)){
+    if(!$('clipboard-copy').text().contains(newestVersion)){
         console.log('false')
         return;
     }

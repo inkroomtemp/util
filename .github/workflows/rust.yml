@@ -6,6 +6,7 @@ on:
   push:
     paths:
       - '.github/workflows/rust.yml'
+      - 'rust/checkArch.js'
     branches:
       - master
   workflow_dispatch:
