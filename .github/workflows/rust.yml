@@ -73,6 +73,7 @@ jobs:
             echo "u=false" >> $GITHUB_OUTPUT
           else 
             echo "最新版本 ${{ steps.v.outputs.ve }}"
+            echo "ve=${{ steps.v.outputs.ve }}" >> $GITHUB_OUTPUT
             echo "u=true" >> $GITHUB_OUTPUT
           fi
   arch: 
@@ -232,7 +233,7 @@ jobs:
           docker buildx imagetools create \
             --tag ${{ secrets.DOCKER_HUB_USERNAME }}/rust:latest \
             --tag ${{ secrets.DOCKER_HUB_USERNAME }}/rust:${{ needs.version.outputs.buildVe }} \
-            ghcr.io/${{ github.repository_owne }}/rust:${{ needs.version.outputs.buildVe }}
+            ghcr.io/${{ github.repository_owner }}/rust:${{ needs.version.outputs.buildVe }}
   dev:
     runs-on: ubuntu-20.04
     permissions: write-all
