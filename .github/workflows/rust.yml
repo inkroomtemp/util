@@ -72,9 +72,8 @@ jobs:
             echo "已是最新版本 $ve"
             echo "u=false" >> $GITHUB_OUTPUT
           else 
-            echo "最新版本 $ve"
+            echo "最新版本 ${{ steps.v.outputs.ve }}"
             echo "u=true" >> $GITHUB_OUTPUT
-            docker run --rm rust:$ve-slim-bullseye rustc --version || (echo "u=false" >> $GITHUB_OUTPUT)
           fi
   arch: 
     runs-on: ubuntu-20.04
