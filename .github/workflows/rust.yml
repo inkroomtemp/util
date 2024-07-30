@@ -24,10 +24,9 @@ jobs:
         run: |
           git clone https://gist.github.com/inkroom/501548078a930c6f3bd98ea257409648 runtime
       - name: Rust
-        uses: actions-rs/toolchain@v1
+        uses: dtolnay/rust-toolchain@stable
         with:
           toolchain: 1.80.0
-          override: true
       - name: Fetch Latest Version
         id: v
         run: |
@@ -108,7 +107,7 @@ jobs:
             # 校验 架构
             cd rust
             npm i axios cherio
-            arch=$(node checkArch.js '${{ steps.arch.outputs.dev_arch }}')
+            arch=$(node checkArch.js '${{ steps.arch.outputs.dev_arch }}' ${{ steps.v.outputs.ve }})
             if [[ "$arch" =~ "true"  ]]; then
               echo '架构一致 ${{ steps.arch.outputs.dev_arch }}'
               echo "u=false" >> $GITHUB_OUTPUT

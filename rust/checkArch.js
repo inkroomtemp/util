@@ -2,12 +2,16 @@ const axios = require('axios');
 const cherio = require("cherio");
 
 let now = JSON.parse( process.argv[2]);
+let newestVersion = process.argv[3];
 console.log(now)
 axios.get('https://github.com/inkroomtemp/util/pkgs/container/rust')
 .then(res=>res.data)
 .then(res=>{
     const $ = cherio.load(res);
-
+    if(!$('clipboard-copy').textContent.contains(newestVersion)){
+        console.log('false')
+        return;
+    }
 
     let m4 = $('.m-4>small');
     let m = [];
