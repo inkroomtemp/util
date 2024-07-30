@@ -52,7 +52,7 @@ jobs:
           else 
             echo "u=true" >> $GITHUB_OUTPUT
             echo "最新版本 $ve"
-            docker run -it --rm rust/$ve-slim-bullseye rustc --version || (echo "u=false" >> $GITHUB_OUTPUT)
+            docker run --rm rust/$ve-slim-bullseye rustc --version || (echo "u=false" >> $GITHUB_OUTPUT)
           fi
       - name: Rust Build Latest Version
         id: buildV
@@ -74,7 +74,7 @@ jobs:
           else 
             echo "最新版本 $ve"
             echo "u=true" >> $GITHUB_OUTPUT
-            docker run -it --rm rust/$ve-slim-bullseye rustc --version || (echo "u=false" >> $GITHUB_OUTPUT)
+            docker run --rm rust/$ve-slim-bullseye rustc --version || (echo "u=false" >> $GITHUB_OUTPUT)
           fi
   arch: 
     runs-on: ubuntu-20.04
