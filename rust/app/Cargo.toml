@@ -2,7 +2,14 @@
 name = "app"
 version = "0.1.0"
 edition = "2021"
+[[bin]]
+name="version"
+path="src/version.rs"
+[[bin]]
+name="app"
+path="src/main.rs"
 
 [dependencies]
 reqwest = { version = "0.12", features = ["json"]}
+select = "0.6.0"
 tokio = { version = "1", features = ["full"]}
