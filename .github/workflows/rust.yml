@@ -31,7 +31,7 @@ jobs:
       - name: Fetch Latest Version
         id: v
         run: |
-          cd rust
+          cd rust/app
           # 不知道为什么,直接拉docker始终没拉到最新版本,只好换个方案了
           cargo build --release
           ve=$(./target/release/version)
