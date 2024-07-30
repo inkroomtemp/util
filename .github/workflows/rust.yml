@@ -229,11 +229,6 @@ jobs:
             --tag ghcr.io/${{ github.repository_owner }}/rust_musl_build:${{ needs.version.outputs.buildVe }} \
             ghcr.io/${{ github.repository_owner }}/rust_musl_build:beta
           docker buildx imagetools inspect ghcr.io/${{ github.repository_owner }}/rust_musl_build:${{ needs.version.outputs.buildVe }}
-
-          docker buildx imagetools create \
-            --tag ${{ secrets.DOCKER_HUB_USERNAME }}/rust:latest \
-            --tag ${{ secrets.DOCKER_HUB_USERNAME }}/rust:${{ needs.version.outputs.buildVe }} \
-            ghcr.io/${{ github.repository_owner }}/rust:${{ needs.version.outputs.buildVe }}
   dev:
     runs-on: ubuntu-20.04
     permissions: write-all
