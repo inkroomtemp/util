@@ -108,7 +108,7 @@ jobs:
             # 校验 架构
             cd rust
             npm i axios cherio
-            arch=$(node checkArch.js '${{ steps.arch.outputs.dev_arch }}' ${{ steps.v.outputs.ve }})
+            arch=$(node checkArch.js '${{ steps.arch.outputs.dev_arch }}' ${{ needs.version.outputs.ve }})
             if [[ "$arch" =~ "true"  ]]; then
               echo '架构一致 ${{ steps.arch.outputs.dev_arch }}'
               echo "u=false" >> $GITHUB_OUTPUT
