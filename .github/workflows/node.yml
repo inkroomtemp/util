@@ -50,10 +50,9 @@ jobs:
       - name: Platforms
         id: platforms
         run: |
-          npm i axios
-          p=$(node arch.js library node ${{ inputs.version }})
+          p=$(curl https://hub.docker.com/v2/namespaces/library/repositories/node/tags/${{ inputs.version }}-bullseye-slim | jq --raw-output -c '[.images[] | select(.architecture!="unknown") | select (.architecture!="ppc64le") | select(.os!="unknown") | .os + "/" + .architecture]' | sed 's/\[//g;s/\]//g;s/"//g')
           echo "支持的架构: $p"
-          echo "p=$v" >> $GITHUB_OUTPUT
+          echo "p=$p" >> $GITHUB_OUTPUT
       - name: Build Docker image
         uses: docker/build-push-action@v5
         with:
