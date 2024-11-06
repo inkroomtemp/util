@@ -30,7 +30,7 @@ async function s() {
     driver = await new Builder().forBrowser('firefox').setFirefoxOptions(options).setFirefoxService(service).build()
     vars = {}
 
-    await driver.get("https://yngal.com/")
+    await driver.get("https://fufugal.com/")
     await driver.findElement(By.css("#formSign > div:nth-child(1) > input")).click()
     await driver.findElement(By.css("#formSign > div:nth-child(1) > input")).sendKeys(process.env.Y_USERNAME)
     await driver.findElement(By.css("#formSign > div:nth-child(2) > input")).click()
