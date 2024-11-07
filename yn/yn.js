@@ -74,8 +74,11 @@ console.log('ok');
 
     var count = await driver.findElement(By.css("body"))
     console.log(await count.getText())
-    count = await driver.findElement(By.css(".el-tooltip__trigger:nth-child(1)"));
-    console.log('count',await count.getText())
+    
+    await driver.get('https://fufugal.com');
+    await driver.sleep(3000);
+    var count = await driver.findElement(By.css(".el-tooltip__trigger:nth-child(1)"));
+    console.log(await count.getText())
 
     // await driver.get("https://www.oschina.net/")
     // await driver.manage().window().setRect({ width: 550, height: 691 })
