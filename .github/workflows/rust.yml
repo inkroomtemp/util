@@ -39,7 +39,7 @@ jobs:
           curl -i -f https://hub.docker.com/v2/namespaces/library/repositories/rust/tags/$tag-slim-bullseye && ve=$(echo "$tag")
           if [[ $ve == "null" ]]
           then 
-            echo "暂无最新版本，或者最新镜像尚未发布"
+            echo "暂无最新版本，或者最新镜像尚未发布 $tag"
             echo "u=false" >> $GITHUB_OUTPUT
           fi
           d=$(docker run --rm ghcr.io/${{ github.repository_owner }}/rust:latest rustc --version || echo "rustc null")
@@ -81,7 +81,7 @@ jobs:
   arch: 
     runs-on: ubuntu-20.04
     needs: [version]
-    if: needs.version.outputs.buildVu == 'true' ||  needs.version.outputs.u == 'true'
+    if: needs.version.outputs.u == 'true'
     outputs:
       dev_arch: ${{ steps.arch.outputs.dev_arch }}
       musl_arch: ${{ steps.arch.outputs.musl_arch }}
