@@ -11,7 +11,7 @@ ARG NODE_MIRROR=https://registry.npmmirror.com/
 ENV PATH ${PATH}:${NODE_HOME}/node-v${NODE_VERSION}-${NODE_DIST}/bin
 RUN mkdir -p ${NODE_HOME} && wget -q https://nodejs.org/dist/v${NODE_VERSION}/node-v${NODE_VERSION}-${NODE_DIST}.tar.gz && tar -zxf node-v${NODE_VERSION}-${NODE_DIST}.tar.gz -C ${NODE_HOME} && rm -rf node-v${NODE_VERSION}-${NODE_DIST}.tar.xz \
   && ${NODE_HOME}/node-v${NODE_VERSION}-${NODE_DIST}/bin/node -v && node -v && npm -v \
-  && npm config set registry ${NODE_MIRROR} \
+  && npm config set registry ${NODE_MIRROR}
 RUN mkdir -p /usr/share/fonts/source-han-sans/ && mkdir -p /usr/share/fonts/source-han-serif/ && wget -q https://mirrors.bfsu.edu.cn/adobe-fonts/source-han-serif/SubsetOTF/SourceHanSerifCN.zip && unzip SourceHanSerifCN.zip -d ff && cp ff/*.otf /usr/share/fonts/source-han-serif/ && rm -rf ff SourceHanSerifCN.zip \
 && wget -q -o /usr/share/fonts/source-han-sans/SourceHanSansCN-Bold.otf https://mirrors.bfsu.edu.cn/adobe-fonts/source-han-sans/SubsetOTF/CN/SourceHanSansCN-Bold.otf \
 && wget -q -o /usr/share/fonts/source-han-sans/SourceHanSansCN-ExtraLight.otf https://mirrors.bfsu.edu.cn/adobe-fonts/source-han-sans/SubsetOTF/CN/SourceHanSansCN-ExtraLight.otf \
