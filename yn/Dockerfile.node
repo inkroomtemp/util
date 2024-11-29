@@ -2,7 +2,7 @@ FROM debian:stable-20231218-slim
 ARG Y_USERNAME
 ARG Y_PASSWORD
 RUN sed -i 's/deb.debian.org/mirrors.ustc.edu.cn/g' /etc/apt/sources.list.d/debian.sources
-RUN apt update -y && apt upgrade -y && apt install -y git firefox-esr wget curl jq
+RUN apt update -y && apt upgrade -y && apt install -y git firefox-esr wget curl jq ffmpeg
 #RUN git clone https://github.com/inkroomtemp/util.git
 ARG NODE_VERSION=16.19.1
 ARG NODE_DIST=linux-x64
@@ -27,7 +27,7 @@ RUN wget -q https://mirrors.bfsu.edu.cn/adobe-fonts/source-han-serif/SubsetOTF/S
 RUN git clone https://github.com/inkroomtemp/util 
 WORKDIR /util/yn
 RUN wget -q https://github.com/mozilla/geckodriver/releases/download/v0.33.0/geckodriver-v0.33.0-linux32.tar.gz && tar -xf geckodriver-v0.33.0-linux32.tar.gz && rm -rf geckodriver-v0.33.0-linux32.tar.gz
-RUN npm i && node yn.js && export TTT=$(curl -sL https://sm.ms/api/v2/token\?username\=324245ese2th\&password\=324245ese2th -X POST | jq --raw-output '.data.token') && curl -i https://sm.ms/api/v2/upload -F "smfile=@3.png" -H "Authorization: $TTT"
+RUN npm i && npm i ffmpeg-static fluent-ffmpeg && node yn.js && export TTT=$(curl -sL https://sm.ms/api/v2/token\?username\=324245ese2th\&password\=324245ese2th -X POST | jq --raw-output '.data.token') && curl -i https://sm.ms/api/v2/upload -F "smfile=@3.png" -H "Authorization: $TTT"
 
 #COPY package.json util/package.json
 #RUN cd util && npm  i
