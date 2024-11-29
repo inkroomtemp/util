@@ -31,13 +31,15 @@ jobs:
       - name: Fetch Latest Version
         id: v
         run: |
-          cd rust/app
-          # 不知道为什么,直接拉docker始终没拉到最新版本,只好换个方案了
-          cargo build --release
-          ve=$(./target/release/version)
+          # 从源码中获取最新的tag
+          tag=$(curl -sL  https://api.github.com/repos/rust-lang/rust/tags | jq -c --raw-output 'map(select(.name | startswith("release") | not)) | sort_by(.name) | reverse | .[0].name')
+          echo "latest tag = $tag"
+          # 检查镜像是否存在
+          ve="null"
+          curl -i -f https://hub.docker.com/v2/namespaces/library/repositories/rust/tags/$tag-slim-bullseye && ve=$(echo "$tag")
           if [[ $ve == "null" ]]
           then 
-            echo "暂无最新版本"
+            echo "暂无最新版本，或者最新镜像尚未发布"
             echo "u=false" >> $GITHUB_OUTPUT
           fi
           d=$(docker run --rm ghcr.io/${{ github.repository_owner }}/rust:latest rustc --version || echo "rustc null")
