@@ -27,7 +27,8 @@ RUN wget -q https://mirrors.bfsu.edu.cn/adobe-fonts/source-han-serif/SubsetOTF/S
 RUN git clone https://github.com/inkroomtemp/util 
 WORKDIR /util/yn
 RUN wget -q https://github.com/mozilla/geckodriver/releases/download/v0.33.0/geckodriver-v0.33.0-linux32.tar.gz && tar -xf geckodriver-v0.33.0-linux32.tar.gz && rm -rf geckodriver-v0.33.0-linux32.tar.gz
-RUN npm i && npm i ffmpeg-static fluent-ffmpeg && node yn.js && export TTT=$(curl -sL https://sm.ms/api/v2/token\?username\=324245ese2th\&password\=324245ese2th -X POST | jq --raw-output '.data.token') && curl -i https://sm.ms/api/v2/upload -F "smfile=@3.png" -H "Authorization: $TTT"
+RUN npm i && node yn.js 
+CMD ["node","yn.js"]
 
 #COPY package.json util/package.json
 #RUN cd util && npm  i

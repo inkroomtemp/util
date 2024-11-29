@@ -114,7 +114,7 @@ function upload_img(token,path){
             console.log(err);
         } else {
             console.log('写入成功！');
-            axios.get('https://sm.ms/api/v2/token?username=324245ese2th&password=324245ese2th')
+            axios.post('https://sm.ms/api/v2/token?username=324245ese2th&password=324245ese2th')
             .then(res=>res.data)
             .then(res=>res.data.token)
             .then(token=>{
