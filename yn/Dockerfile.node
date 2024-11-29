@@ -2,7 +2,7 @@ FROM debian:stable-20231218-slim
 ARG Y_USERNAME
 ARG Y_PASSWORD
 RUN sed -i 's/deb.debian.org/mirrors.ustc.edu.cn/g' /etc/apt/sources.list.d/debian.sources
-RUN apt update -y && apt upgrade -y && apt install -y git firefox-esr wget curl jq ffmpeg
+RUN apt update -y && apt upgrade -y && apt install -y git firefox-esr wget unzip
 #RUN git clone https://github.com/inkroomtemp/util.git
 ARG NODE_VERSION=16.19.1
 ARG NODE_DIST=linux-x64
@@ -12,9 +12,7 @@ ENV PATH ${PATH}:${NODE_HOME}/node-v${NODE_VERSION}-${NODE_DIST}/bin
 RUN mkdir -p ${NODE_HOME} && wget -q https://nodejs.org/dist/v${NODE_VERSION}/node-v${NODE_VERSION}-${NODE_DIST}.tar.gz && tar -zxf node-v${NODE_VERSION}-${NODE_DIST}.tar.gz -C ${NODE_HOME} && rm -rf node-v${NODE_VERSION}-${NODE_DIST}.tar.xz \
   && ${NODE_HOME}/node-v${NODE_VERSION}-${NODE_DIST}/bin/node -v && node -v && npm -v \
   && npm config set registry ${NODE_MIRROR} \
-  && npm i -g nrm
-RUN apt install -y unzip && mkdir -p /usr/share/fonts/source-han-sans/ && mkdir -p /usr/share/fonts/source-han-serif/ 
-RUN wget -q https://mirrors.bfsu.edu.cn/adobe-fonts/source-han-serif/SubsetOTF/SourceHanSerifCN.zip && unzip SourceHanSerifCN.zip -d ff && cp ff/*.otf /usr/share/fonts/source-han-serif/ && rm -rf ff SourceHanSerifCN.zip  \
+RUN mkdir -p /usr/share/fonts/source-han-sans/ && mkdir -p /usr/share/fonts/source-han-serif/ && wget -q https://mirrors.bfsu.edu.cn/adobe-fonts/source-han-serif/SubsetOTF/SourceHanSerifCN.zip && unzip SourceHanSerifCN.zip -d ff && cp ff/*.otf /usr/share/fonts/source-han-serif/ && rm -rf ff SourceHanSerifCN.zip \
 && wget -q -o /usr/share/fonts/source-han-sans/SourceHanSansCN-Bold.otf https://mirrors.bfsu.edu.cn/adobe-fonts/source-han-sans/SubsetOTF/CN/SourceHanSansCN-Bold.otf \
 && wget -q -o /usr/share/fonts/source-han-sans/SourceHanSansCN-ExtraLight.otf https://mirrors.bfsu.edu.cn/adobe-fonts/source-han-sans/SubsetOTF/CN/SourceHanSansCN-ExtraLight.otf \
 && wget -q -o /usr/share/fonts/source-han-sans/SourceHanSansCN-Heavy.otf https://mirrors.bfsu.edu.cn/adobe-fonts/source-han-sans/SubsetOTF/CN/SourceHanSansCN-Heavy.otf \
@@ -22,7 +20,7 @@ RUN wget -q https://mirrors.bfsu.edu.cn/adobe-fonts/source-han-serif/SubsetOTF/S
 && wget -q -o /usr/share/fonts/source-han-sans/SourceHanSansCN-Medium.otf https://mirrors.bfsu.edu.cn/adobe-fonts/source-han-sans/SubsetOTF/CN/SourceHanSansCN-Medium.otf \
 && wget -q -o /usr/share/fonts/source-han-sans/SourceHanSansCN-Normal.otf https://mirrors.bfsu.edu.cn/adobe-fonts/source-han-sans/SubsetOTF/CN/SourceHanSansCN-Normal.otf \
 && wget -q -o /usr/share/fonts/source-han-sans/SourceHanSansCN-Regular.otf https://mirrors.bfsu.edu.cn/adobe-fonts/source-han-sans/SubsetOTF/CN/SourceHanSansCN-Regular.otf \
-&& fc-cache -fv 
+&& fc-cache -fv
 
 RUN git clone https://github.com/inkroomtemp/util 
 WORKDIR /util/yn

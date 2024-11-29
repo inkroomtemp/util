@@ -36,7 +36,7 @@ function upload_img(token,path){
         data: form,
     }).then(res=>{
         console.log(res.data);
-        return res;
+        return res.data;
     });
 }
 
@@ -107,7 +107,8 @@ function upload_img(token,path){
     await driver.manage().window().setRect({ x: 0, y: 0, width, height: height });
     await driver.sleep(3000);
     let base64 = await driver.takeScreenshot();
-    const path = '3.png';
+    let date = new Date();
+    const path =  (date.getFullYear()) +"-"+(date.getMonth()+1).toString().padStart(2,'0')+'-'+(date.getDate()).toString().padStart(2,'0')+ '.png';
     const dataBuffer = Buffer.from(base64, 'base64'); //把base64码转成buffer对象，
     fs.writeFile(path, dataBuffer, function (err) {//用fs写入文件
         if (err) {
@@ -118,11 +119,11 @@ function upload_img(token,path){
             .then(res=>res.data)
             .then(res=>res.data.token)
             .then(token=>{
-                return upload_img(token,"3.png")
+                return upload_img(token,path)
                 .catch(e=>{
                     if (e.response.status == 413) {//文件过大
                         // 尝试压缩后再次上传
-                        const out = `3.jpeg`;
+                        const out = path.replace('png','jpeg');
                         console.log(`尝试压缩文件到 ${out}`);
                         return new Promise((resolve,reject)=>{
             				ffmpeg().input(`${path}`)

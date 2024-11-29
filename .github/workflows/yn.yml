@@ -4,7 +4,10 @@ name: yn
 on:
   schedule:
     - cron: '0 0 * * *'
-
+  push:
+    paths:
+      - '.github/workflows/yn.yml'
+      - 'yn/**'
   # Allows you to run this workflow manually from the Actions tab
   workflow_dispatch:
 
@@ -26,7 +29,7 @@ jobs:
         with:
           # npm cache files are stored in `~/.npm` on Linux/macOS
           path: ${{ github.workspace }}/image.tar
-          key: yn-3
+          key: yn
       - name: Build Docker Image
         uses: docker/build-push-action@v5
         if: ${{ steps.cache.outputs.cache-hit != 'true' }}
