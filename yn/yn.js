@@ -97,6 +97,7 @@ function upload_img(token,path){
             await driver.sleep(500);
             h = await driver.executeScript(js_h);
         } else {
+            await driver.executeScript(`window.scrollTo(0,0)`);
             break;
         }
     }
