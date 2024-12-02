@@ -43,7 +43,6 @@ jobs:
           else 
             echo "u=true" >> $GITHUB_OUTPUT
             echo "最新版本 $ve"
-            docker run --rm rust:$ve-slim-bullseye rustc --version || (echo "u=false" >> $GITHUB_OUTPUT)
           fi
       - name: Rust Build Latest Version
         id: buildV
