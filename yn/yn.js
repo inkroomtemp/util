@@ -127,7 +127,9 @@ function upload_img(token,path){
                         console.log(`尝试压缩文件到 ${out}`);
                         return new Promise((resolve,reject)=>{
             				ffmpeg().input(`${path}`)
-                                .audioQuality(80)
+                                .outputOptions([
+                                    '-compression_level 9'
+                                ])
                                 .on('end',()=>{
                                     if (fs.existsSync(out)) {
                                         upload_img(token,out).catch(ex => {
