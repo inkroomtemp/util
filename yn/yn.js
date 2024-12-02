@@ -119,41 +119,34 @@ function upload_img(token,path){
             .then(res=>res.data)
             .then(res=>res.data.token)
             .then(token=>{
-                return upload_img(token,path)
-                .catch(e=>{
-                    if (e.response.status == 413) {//文件过大
-                        // 尝试压缩后再次上传
-                        const out = path.replace('png','jpeg');
-                        console.log(`尝试压缩文件到 ${out}`);
-                        return new Promise((resolve,reject)=>{
-            				ffmpeg().input(`${path}`)
-                                .outputOptions([
-                                    '-compression_level 9'
-                                ])
-                                .on('end',()=>{
-                                    if (fs.existsSync(out)) {
-                                        upload_img(token,out).catch(ex => {
-                                            if (ex.response.status == 413) {
-                                                console.log(`压缩后仍不能上传 ${path} ${fs.statSync(path).size} ${fs.statSync(out).size}`)
-                                                resolve();
-                                            } else {
-                                                console.log(ex);
-                                                reject(ex);
-                                            }
-                                        }).then(resolve)
-                                    } else {//可能压缩失败
-                                        reject('无输出文件');
-                                    }
-                                })
-                                .on('error', (err) => {
-                                    console.log('压缩错误 An error occurred: ' + err.message);
-                                    reject(err);
-                                  })
-                                .save(out)
-                            
-                        });
-                    }
-                })
+                return new Promise((resolve,reject)=>{
+                    const out = path.replace('png','jpeg');
+                    ffmpeg().input(`${path}`)
+                    .outputOptions([
+                        '-compression_level 9'
+                    ])
+                    .on('end',()=>{
+                        console.log('压缩文件');
+                        if (fs.existsSync(out)) {
+                            upload_img(token,out).catch(ex => {
+                                if (ex.response.status == 413) {
+                                    console.log(`压缩后仍不能上传 ${path} ${fs.statSync(path).size} ${fs.statSync(out).size}`)
+                                    resolve();
+                                } else {
+                                    console.log(ex);
+                                    reject(ex);
+                                }
+                            }).then(resolve)
+                        } else {//可能压缩失败
+                            reject('无输出文件');
+                        }
+                    })
+                    .on('error', (err) => {
+                        console.log('压缩错误 An error occurred: ' + err.message);
+                        reject(err);
+                      })
+                    .save(out)
+                });
             }).then(res=>{
                 console.log('上传结束 ',res);
             }).catch(e=>{
