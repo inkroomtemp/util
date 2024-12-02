@@ -81,7 +81,7 @@ jobs:
       - name: arch
         id: arch
         run: |
-          dev_arch=$(curl -sL https://hub.docker.com/v2/namespaces/library/repositories/debian/tags/bookworm-slim | jq -c '[.images[] | select(.architecture!="unknown") | select (.architecture!="ppc64le") | select(.os!="unknown") | .os + "/" + .architecture]')
+          dev_arch=$(curl -sL https://hub.docker.com/v2/namespaces/library/repositories/debian/tags/bookworm-slim | jq -c '[.images[] | select(.architecture!="unknown") | select (.architecture!="ppc64le") | select(.architecture!="mips64le") | select(.os!="unknown") | .os + "/" + .architecture]')
           echo "dev_arch=$dev_arch"
           musl_arch=$(curl -sL https://hub.docker.com/v2/namespaces/library/repositories/debian/tags/buster | jq -c '[.images[] | select(.architecture!="unknown") | select(.architecture!="386") | select(.architecture!="arm") | select(.os!="unknown") | .os + "/" + .architecture]')
           musl_arch_raw=$(curl -sL https://hub.docker.com/v2/namespaces/library/repositories/debian/tags/buster | jq -c --raw-output '[.images[] | select(.architecture!="unknown") | select(.architecture!="386") | select(.architecture!="arm") | select(.os!="unknown") | .os + "/" + .architecture] | join(",")')
