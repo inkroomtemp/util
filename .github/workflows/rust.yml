@@ -27,20 +27,14 @@ jobs:
       - name: Rust
         uses: dtolnay/rust-toolchain@stable
         with:
-          toolchain: 1.80.0
+          toolchain: stable
       - name: Fetch Latest Version
         id: v
         run: |
-          ve=$(docker run  --rm  rust:slim-bullseye rustc --version)
-          if [[ $ve == "null" ]]
-          then 
-            echo "暂无最新版本，或者最新镜像尚未发布 $tag"
-            echo "u=false" >> $GITHUB_OUTPUT
-          fi
+          ve=$(rustc --version | awk '{print $2}')
           d=$(docker run --rm ghcr.io/${{ github.repository_owner }}/rust:latest rustc --version || echo "rustc null")
           echo "docker version=$d"
           echo "latest version=$ve"
-          ve=$(echo $ve | awk '{print $2}')
           d=$(echo $d | awk '{print $2}')
           echo "ve=$ve" >> $GITHUB_OUTPUT
           if [[ "$d" =~ "$ve"  ]]; then
@@ -88,7 +82,7 @@ jobs:
       - name: arch
         id: arch
         run: |
-          dev_arch=$(curl -sL https://hub.docker.com/v2/namespaces/library/repositories/rust/tags/${{ needs.version.outputs.ve }}-slim-bullseye | jq -c '[.images[] | select(.architecture!="unknown") | select (.architecture!="ppc64le") | select(.os!="unknown") | .os + "/" + .architecture]')
+          dev_arch=$(curl -sL https://hub.docker.com/v2/namespaces/library/repositories/debian/tags/bookworm-slim | jq -c '[.images[] | select(.architecture!="unknown") | select (.architecture!="ppc64le") | select(.os!="unknown") | .os + "/" + .architecture]')
           echo "dev_arch=$dev_arch"
           musl_arch=$(curl -sL https://hub.docker.com/v2/namespaces/library/repositories/debian/tags/buster | jq -c '[.images[] | select(.architecture!="unknown") | select(.architecture!="386") | select(.architecture!="arm") | select(.os!="unknown") | .os + "/" + .architecture]')
           musl_arch_raw=$(curl -sL https://hub.docker.com/v2/namespaces/library/repositories/debian/tags/buster | jq -c --raw-output '[.images[] | select(.architecture!="unknown") | select(.architecture!="386") | select(.architecture!="arm") | select(.os!="unknown") | .os + "/" + .architecture] | join(",")')
