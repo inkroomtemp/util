@@ -350,4 +350,4 @@ jobs:
           versions=$(gh api -H "Accept: application/vnd.github+json"   -H "X-GitHub-Api-Version: 2022-11-28"   /user/packages/container/rust/versions)
           echo "$versions"
           export now=$(date +%Y-%m-%d)
-          echo "$versions" | jq --arg now "$now" '.[] | select( .created_at | startswith(env.now)) | .id ' | tail -n +2 | while read line ; do echo "delete $line" && gh api   --method DELETE   -H "Accept: application/vnd.github+json"   -H "X-GitHub-Api-Version: 2022-11-28"   /user/packages/container/rust/versions/$line ; done 
+          echo "$versions" | jq --arg now "$now" '.[] | select( .metadata.container.tags | length == 0) | .id ' | while read line ; do echo "delete $line" && gh api   --method DELETE   -H "Accept: application/vnd.github+json"   -H "X-GitHub-Api-Version: 2022-11-28"   /user/packages/container/rust/versions/$line ; done 
