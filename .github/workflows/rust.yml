@@ -14,7 +14,7 @@ on:
       v:
        description: 'rust version'
        required: true
-       default: 'string'
+       type: 'string'
 jobs:
   version:
     runs-on: ubuntu-20.04
@@ -37,7 +37,7 @@ jobs:
       - name: Fetch Latest Version
         id: v
         run: |
-          if [[ "${{ inputs.v }}" == "null" ]]
+          if [[ "${{ inputs.v }}" == "" ]]
           then
             ve=$(rustc --version | awk '{print $2}')
             d=$(docker run --rm ghcr.io/${{ github.repository_owner }}/rust:latest rustc --version || echo "rustc null")
@@ -61,7 +61,7 @@ jobs:
       - name: Rust Build Latest Version
         id: buildV
         run: |
-          if [[ "${{ inputs.v }}" == "null" ]]
+          if [[ "${{ inputs.v }}" == "" ]]
           then
             d=$(docker run --rm ghcr.io/${{ github.repository_owner }}/rust_musl_build:latest rustc --version || echo "rustc null")
             d=$(echo $d | awk '{print $2}')
