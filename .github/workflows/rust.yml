@@ -10,6 +10,11 @@ on:
     branches:
       - master
   workflow_dispatch:
+    inputs:
+      v:
+       description: 'rust version'
+       required: true
+       default: 'string'
 jobs:
   version:
     runs-on: ubuntu-20.04
@@ -25,13 +30,6 @@ jobs:
       - name: Checkout Runtime
         run: |
           git clone https://gist.github.com/inkroom/501548078a930c6f3bd98ea257409648 runtime
-      - name: Delete Temp Image
-        env:
-          GH_TOKEN: ${{ github.token }}
-        run: |
-          gh api -H "Accept: application/vnd.github+json"   -H "X-GitHub-Api-Version: 2022-11-28"   /user/packages/container/rust/versions | jq --arg now "$now" '.[] | select( .metadata.container.tags | length == 0) | .id ' | while read line ; do echo "delete $line" && gh api   --method DELETE   -H "Accept: application/vnd.github+json"   -H "X-GitHub-Api-Version: 2022-11-28"   /user/packages/container/rust/versions/$line ; done 
-          echo "--------------------------"
-          gh api -H "Accept: application/vnd.github+json"   -H "X-GitHub-Api-Version: 2022-11-28"   /user/packages/container/rust_musl_build/versions | jq --arg now "$now" '.[] | select( .metadata.container.tags | length == 0) | .id ' | while read line ; do echo "delete $line" && gh api   --method DELETE   -H "Accept: application/vnd.github+json"   -H "X-GitHub-Api-Version: 2022-11-28"   /user/packages/container/rust_musl_build/versions/$line ; done 
       - name: Rust
         uses: dtolnay/rust-toolchain@stable
         with:
@@ -39,40 +37,55 @@ jobs:
       - name: Fetch Latest Version
         id: v
         run: |
-          ve=$(rustc --version | awk '{print $2}')
-          d=$(docker run --rm ghcr.io/${{ github.repository_owner }}/rust:latest rustc --version || echo "rustc null")
-          echo "docker version=$d"
-          echo "latest version=$ve"
-          d=$(echo $d | awk '{print $2}')
-          echo "ve=$ve" >> $GITHUB_OUTPUT
-          if [[ "$d" =~ "$ve"  ]]; then
-            echo "已是最新版本 $ve"      
-            echo "u=true" >> $GITHUB_OUTPUT
-          else 
-            echo "u=true" >> $GITHUB_OUTPUT
-            echo "最新版本 $ve"
+          if [[ "${{ inputs.v }}" == "null" ]]
+          then
+            ve=$(rustc --version | awk '{print $2}')
+            d=$(docker run --rm ghcr.io/${{ github.repository_owner }}/rust:latest rustc --version || echo "rustc null")
+            echo "docker version=$d"
+            echo "latest version=$ve"
+            d=$(echo $d | awk '{print $2}')
+            echo "ve=$ve" >> $GITHUB_OUTPUT
+            if [[ "$d" =~ "$ve"  ]]; then
+              echo "已是最新版本 $ve"      
+              echo "u=true" >> $GITHUB_OUTPUT
+            else 
+              echo "u=true" >> $GITHUB_OUTPUT
+              echo "最新版本 $ve"
+            fi
+          else
+              ve="${{ inputs.v }}"
+              echo "ve=$ve" >> $GITHUB_OUTPUT
+              echo "u=true" >> $GITHUB_OUTPUT
+              echo "手动版本 $ve"
           fi
       - name: Rust Build Latest Version
         id: buildV
         run: |
-          d=$(docker run --rm ghcr.io/${{ github.repository_owner }}/rust_musl_build:latest rustc --version || echo "rustc null")
-          d=$(echo $d | awk '{print $2}')
-          if [[ $d == "null" ]]
-          then 
-            echo "暂无最新版本"
-            echo "ve=${{ steps.v.outputs.ve }}" >> $GITHUB_OUTPUT
-            echo "u=false" >> $GITHUB_OUTPUT
-          fi
-          echo "docker version=$d"
-          echo "latest version=${{ steps.v.outputs.ve }}"
-          echo "ve=$d" >> $GITHUB_OUTPUT
-          if [[ "$d" =~ "${{ steps.v.outputs.ve }}"  ]]; then
-            echo "已是最新版本 $ve"
-            echo "u=false" >> $GITHUB_OUTPUT
-          else 
-            echo "最新版本 ${{ steps.v.outputs.ve }}"
-            echo "ve=${{ steps.v.outputs.ve }}" >> $GITHUB_OUTPUT
-            echo "u=true" >> $GITHUB_OUTPUT
+          if [[ "${{ inputs.v }}" == "null" ]]
+          then
+            d=$(docker run --rm ghcr.io/${{ github.repository_owner }}/rust_musl_build:latest rustc --version || echo "rustc null")
+            d=$(echo $d | awk '{print $2}')
+            if [[ $d == "null" ]]
+            then 
+              echo "暂无最新版本"
+              echo "ve=${{ steps.v.outputs.ve }}" >> $GITHUB_OUTPUT
+              echo "u=false" >> $GITHUB_OUTPUT
+            fi
+            echo "docker version=$d"
+            echo "latest version=${{ steps.v.outputs.ve }}"
+            echo "ve=$d" >> $GITHUB_OUTPUT
+            if [[ "$d" =~ "${{ steps.v.outputs.ve }}"  ]]; then
+              echo "已是最新版本 $ve"
+              echo "u=false" >> $GITHUB_OUTPUT
+            else 
+              echo "最新版本 ${{ steps.v.outputs.ve }}"
+              echo "ve=${{ steps.v.outputs.ve }}" >> $GITHUB_OUTPUT
+              echo "u=true" >> $GITHUB_OUTPUT
+            fi
+          else
+              echo "手动版本 ${{ inputs.v }}"
+              echo "ve=${{ inputs.v }}" >> $GITHUB_OUTPUT
+              echo "u=true" >> $GITHUB_OUTPUT
           fi
   arch: 
     runs-on: ubuntu-20.04
@@ -227,11 +240,6 @@ jobs:
             --tag ghcr.io/${{ github.repository_owner }}/rust_musl_build:${{ needs.version.outputs.buildVe }} \
             ghcr.io/${{ github.repository_owner }}/rust_musl_build:beta
           docker buildx imagetools inspect ghcr.io/${{ github.repository_owner }}/rust_musl_build:${{ needs.version.outputs.buildVe }}
-      - name: Delete Temp Image
-        env:
-          GH_TOKEN: ${{ github.token }}
-        run: |
-          gh api -H "Accept: application/vnd.github+json"   -H "X-GitHub-Api-Version: 2022-11-28"   /user/packages/container/rust_musl_build/versions | jq --arg now "$now" '.[] | select( .metadata.container.tags | length == 0) | .id ' | while read line ; do echo "delete $line" && gh api   --method DELETE   -H "Accept: application/vnd.github+json"   -H "X-GitHub-Api-Version: 2022-11-28"   /user/packages/container/rust_musl_build/versions/$line ; done 
   dev:
     runs-on: ubuntu-20.04
     permissions: write-all
@@ -355,8 +363,3 @@ jobs:
           docker buildx imagetools inspect ${{ secrets.DOCKER_HUB_USERNAME }}/rust:${{ needs.version.outputs.ve }}
           echo "------------------------"
           docker buildx imagetools inspect ghcr.io/${{ github.repository_owner }}/rust:${{ needs.version.outputs.ve }}
-      - name: Delete Temp Image
-        env:
-          GH_TOKEN: ${{ github.token }}
-        run: |          
-          gh api -H "Accept: application/vnd.github+json"   -H "X-GitHub-Api-Version: 2022-11-28"   /user/packages/container/rust/versions | jq --arg now "$now" '.[] | select( .metadata.container.tags | length == 0) | .id ' | while read line ; do echo "delete $line" && gh api   --method DELETE   -H "Accept: application/vnd.github+json"   -H "X-GitHub-Api-Version: 2022-11-28"   /user/packages/container/rust/versions/$line ; done 
