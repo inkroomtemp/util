@@ -101,6 +101,9 @@ function upload_img(token,path){
             break;
         }
     }
+    console.log('waiting img',new Date().getTime());
+    await driver.wait(until.elementIsVisible(await driver.findElement(By.css('img'))));
+    console.log('waiting img',new Date().getTime());
 
     let height = await driver.executeScript("return Math.max(document.body.offsetHeight, document.documentElement.offsetHeight);");
     let width = await driver.executeScript("return document.body.offsetWidth;")
