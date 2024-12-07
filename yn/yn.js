@@ -87,7 +87,8 @@ function upload_img(token,path){
 
 // 模拟滚动
     await driver.wait(until.elementIsVisible(await driver.findElement(By.css('img'))));
-
+    await driver.executeScript("let m = $('img[data-src]');for(let i=0;i<m.length;i++){let h = m[i];h.setAttribute('src',h.getAttribute('data-src'))};");
+/*
     let js_h = 'return document.body.clientHeight';
     let h = await driver.executeScript(js_h);
     for (let i = 1; ; i++) {
@@ -101,6 +102,7 @@ function upload_img(token,path){
             break;
         }
     }
+*/
     console.log('waiting img',new Date().getTime());
     await driver.wait(until.elementIsVisible(await driver.findElement(By.css('img'))));
     console.log('waiting img',new Date().getTime());
