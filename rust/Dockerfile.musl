@@ -1,5 +1,8 @@
 FROM debian:buster
 ARG RUST_VERSION
+ENV CARGO_HOME=/usr/local/cargo
+ENV RUSTUP_HOME /usr/local/rustup
+ENV PATH ${PATH}:${CARGO_HOME}/bin:.
 RUN arch && echo "uname=$(uname -a)" && echo "-p=$(uname -p)" && echo "dpkg=$(dpkg --print-architecture)" && sed -i 's/deb.debian.org/mirrors.ustc.edu.cn/g' /etc/apt/sources.list && apt update -y && apt install -y musl-dev \
   musl-tools \
   file \
