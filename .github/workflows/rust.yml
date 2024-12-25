@@ -94,7 +94,6 @@ jobs:
   arch: 
     runs-on: ubuntu-20.04
     needs: [version]
-    if: needs.version.outputs.u == 'true'
     outputs:
       dev_arch: ${{ steps.arch.outputs.dev_arch }}
       musl_arch: ${{ steps.arch.outputs.musl_arch }}
