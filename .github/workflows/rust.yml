@@ -22,6 +22,7 @@ jobs:
     outputs:
       ve: ${{ steps.v.outputs.ve }}
       u: ${{ steps.v.outputs.u }}
+      checkArch: ${{ steps.v.output.checkArch }}
       buildVe: ${{ steps.buildV.outputs.ve }}
       buildVu: ${{ steps.buildV.outputs.u }}
     steps:
@@ -47,15 +48,18 @@ jobs:
             echo "ve=$ve" >> $GITHUB_OUTPUT
             if [[ "$d" =~ "$ve"  ]]; then
               echo "已是最新版本 $ve"      
-              echo "u=true" >> $GITHUB_OUTPUT
+              echo "u=false" >> $GITHUB_OUTPUT
+              echo "checkArch=true" >> $GITHUB_OUTPUT
             else 
               echo "u=true" >> $GITHUB_OUTPUT
-              echo "最新版本 $ve"
+              echo "checkArch=false" >> $GITHUB_OUTPUT
+              echo "发现最新版本 $ve"
             fi
           else
               ve="${{ inputs.v }}"
               echo "ve=$ve" >> $GITHUB_OUTPUT
               echo "u=true" >> $GITHUB_OUTPUT
+              echo "checkArch=false" >> $GITHUB_OUTPUT
               echo "手动版本 $ve"
           fi
       - name: Rust Build Latest Version
@@ -114,7 +118,7 @@ jobs:
       - name: check
         id: check
         run: |
-          if [[ "${{ needs.version.outputs.u }}" =~ "true"  ]]; then
+          if [[ "${{ needs.version.outputs.checkArch }}" =~ "true"  ]]; then
 
             # 校验 架构
             cd rust
