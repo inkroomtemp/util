@@ -22,7 +22,7 @@ jobs:
     outputs:
       ve: ${{ steps.v.outputs.ve }}
       u: ${{ steps.v.outputs.u }}
-      checkArch: ${{ steps.v.output.checkArch }}
+      checkArch: ${{ steps.v.outputs.checkArch }}
       buildVe: ${{ steps.buildV.outputs.ve }}
       buildVu: ${{ steps.buildV.outputs.u }}
     steps:
