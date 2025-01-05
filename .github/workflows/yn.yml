@@ -52,7 +52,7 @@ jobs:
           Y_USERNAME: ${{ secrets.Y_USERNAME }}
           Y_PASSWORD: ${{ secrets.Y_PASSWORD }}
         run: |
-          source /ect/profile
+          . /ect/profile
           cd yn && node yn.js
       - name: Retry the workflow
         if: github.event_name == 'schedule' && failure()
