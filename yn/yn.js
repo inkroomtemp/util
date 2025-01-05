@@ -41,13 +41,16 @@ function upload_img(token,path){
 }
 
 (async function () {
+
+    process.setuid(1001);
+
     const service = new firefox.ServiceBuilder(`${process.cwd()}/geckodriver`);
     const options = new firefox.Options();
     options.addArguments('-headless');
     driver = await new Builder().forBrowser('firefox')
     .setFirefoxOptions(options)
-    // .setFirefoxService(service)
-    .usingServer('http://127.0.0.1:38472')
+    .setFirefoxService(service)
+    // .usingServer('http://127.0.0.1:38472')
     .build()
     vars = {}
 
