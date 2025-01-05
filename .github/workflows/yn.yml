@@ -47,9 +47,7 @@ jobs:
           npm i
           chmod +x geckodriver
           export DEBIAN_FRONTEND=noninteractive
-          useradd selenium &&  echo "selenium:selenium" | chpasswd
-          su selenium
-          id
+          useradd -m selenium &&  echo "selenium:selenium" | chpasswd
           nohup sudo -u selenium ./geckodriver --port 38472 > gec.log 2>&1 &
       - name: Run
         env:
