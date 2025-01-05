@@ -17,41 +17,39 @@ jobs:
   build:
     # The type of runner that the job will run on
     runs-on: ubuntu-20.04
-
+    container:
+      image: debian:stable-20231218-slim
     # Steps represent a sequence of tasks that will be executed as part of the job
     steps:
       # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
       - name: Checkout
         uses: actions/checkout@v4
-      - name: Cache
-        id: cache
-        uses: actions/cache@v4
-        with:
-          # npm cache files are stored in `~/.npm` on Linux/macOS
-          path: ${{ github.workspace }}/image.tar
-          key: yn
-      - name: Build Docker Image
-        uses: docker/build-push-action@v5
-        if: ${{ steps.cache.outputs.cache-hit != 'true' }}
-        with:
-          context: yn
-          file: yn/Dockerfile.node
-          push: false
-          load: true
-          tags: yn
-          labels: yn
-          build-args: |
-            Y_USERNAME=${{ secrets.Y_USERNAME }}
-            Y_PASSWORD=${{ secrets.Y_PASSWORD }}
-      - name: Save Docker Image
-        if: ${{ steps.cache.outputs.cache-hit != 'true' }}
+      - name: Ready
+        env:
+          NODE_DIST: linux-x64
+          NODE_HOME: /usr/local/lib/nodejs
         run: |
-          docker save yn -o ${{ github.workspace }}/image.tar
-      - name: Run Docker Image
-        if: ${{ steps.cache.outputs.cache-hit == 'true' }}
+          apt update -y && apt upgrade -y && apt install -y git firefox-esr wget unzip
+          export PATH=${PATH}:${NODE_HOME}/node-v${NODE_VERSION}-${NODE_DIST}/bin
+          mkdir -p ${NODE_HOME} && wget -q https://nodejs.org/dist/v${NODE_VERSION}/node-v${NODE_VERSION}-${NODE_DIST}.tar.gz && tar -zxf node-v${NODE_VERSION}-${NODE_DIST}.tar.gz -C ${NODE_HOME} && rm -rf node-v${NODE_VERSION}-${NODE_DIST}.tar.xz \
+            && ${NODE_HOME}/node-v${NODE_VERSION}-${NODE_DIST}/bin/node -v && node -v && npm -v \
+          mkdir -p /usr/share/fonts/source-han-sans/ && mkdir -p /usr/share/fonts/source-han-serif/ && wget -q https://mirrors.bfsu.edu.cn/adobe-fonts/source-han-serif/SubsetOTF/SourceHanSerifCN.zip && unzip SourceHanSerifCN.zip -d ff && cp ff/*.otf /usr/share/fonts/source-han-serif/ && rm -rf ff SourceHanSerifCN.zip \
+          && wget -q -o /usr/share/fonts/source-han-sans/SourceHanSansCN-Bold.otf https://mirrors.bfsu.edu.cn/adobe-fonts/source-han-sans/SubsetOTF/CN/SourceHanSansCN-Bold.otf \
+          && wget -q -o /usr/share/fonts/source-han-sans/SourceHanSansCN-ExtraLight.otf https://mirrors.bfsu.edu.cn/adobe-fonts/source-han-sans/SubsetOTF/CN/SourceHanSansCN-ExtraLight.otf \
+          && wget -q -o /usr/share/fonts/source-han-sans/SourceHanSansCN-Heavy.otf https://mirrors.bfsu.edu.cn/adobe-fonts/source-han-sans/SubsetOTF/CN/SourceHanSansCN-Heavy.otf \
+          && wget -q -o /usr/share/fonts/source-han-sans/SourceHanSansCN-Light.otf https://mirrors.bfsu.edu.cn/adobe-fonts/source-han-sans/SubsetOTF/CN/SourceHanSansCN-Light.otf \
+          && wget -q -o /usr/share/fonts/source-han-sans/SourceHanSansCN-Medium.otf https://mirrors.bfsu.edu.cn/adobe-fonts/source-han-sans/SubsetOTF/CN/SourceHanSansCN-Medium.otf \
+          && wget -q -o /usr/share/fonts/source-han-sans/SourceHanSansCN-Normal.otf https://mirrors.bfsu.edu.cn/adobe-fonts/source-han-sans/SubsetOTF/CN/SourceHanSansCN-Normal.otf \
+          && wget -q -o /usr/share/fonts/source-han-sans/SourceHanSansCN-Regular.otf https://mirrors.bfsu.edu.cn/adobe-fonts/source-han-sans/SubsetOTF/CN/SourceHanSansCN-Regular.otf \
+          && fc-cache -fv
+          wget -q https://github.com/mozilla/geckodriver/releases/download/v0.33.0/geckodriver-v0.33.0-linux32.tar.gz && tar -xf geckodriver-v0.33.0-linux32.tar.gz && rm -rf geckodriver-v0.33.0-linux32.tar.gz
+          npm i
+      - name: Run
+        env:
+          Y_USERNAME: ${{ secrets.Y_USERNAME }}
+          Y_PASSWORD: ${{ secrets.Y_PASSWORD }}
         run: |
-          docker load -q -i ${{ github.workspace }}/image.tar
-          docker run --rm -w /util/yn -e Y_USERNAME=${{ secrets.Y_USERNAME }} -e Y_PASSWORD=${{ secrets.Y_PASSWORD }} yn node yn.js
+          node yn.js
       - name: Retry the workflow
         if: github.event_name == 'schedule' && failure()
         env:
