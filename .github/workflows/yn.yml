@@ -46,6 +46,8 @@ jobs:
           wget -q https://github.com/mozilla/geckodriver/releases/download/v0.35.0/geckodriver-v0.35.0-linux32.tar.gz && tar -xf geckodriver-v0.35.0-linux32.tar.gz && rm -rf geckodriver-v0.35.0-linux32.tar.gz
           npm i
           chmod +x geckodriver
+          adduser selenium
+          su selenium
           nohup ./geckodriver --port 38472 > gec.log 2>&1 &
       - name: Run
         env:
@@ -53,7 +55,8 @@ jobs:
           Y_PASSWORD: ${{ secrets.Y_PASSWORD }}
         run: |
           cd yn 
-          node yn.js || cat gec.log
+          su selenium
+          node yn.js || (cat gec.log && exit 101)
       - name: Retry the workflow
         if: github.event_name == 'schedule' && failure()
         env:
