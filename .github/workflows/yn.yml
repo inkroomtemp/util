@@ -28,11 +28,13 @@ jobs:
         env:
           NODE_DIST: linux-x64
           NODE_HOME: /usr/local/lib/nodejs
+          NODE_VERSION: 16.19.1
         run: |
           apt update -y && apt upgrade -y && apt install -y git firefox-esr wget unzip
           export PATH=${PATH}:${NODE_HOME}/node-v${NODE_VERSION}-${NODE_DIST}/bin
-          mkdir -p ${NODE_HOME} && wget -q https://nodejs.org/dist/v${NODE_VERSION}/node-v${NODE_VERSION}-${NODE_DIST}.tar.gz && tar -zxf node-v${NODE_VERSION}-${NODE_DIST}.tar.gz -C ${NODE_HOME} && rm -rf node-v${NODE_VERSION}-${NODE_DIST}.tar.xz \
-            && ${NODE_HOME}/node-v${NODE_VERSION}-${NODE_DIST}/bin/node -v && node -v && npm -v \
+          echo "PATH=$PATH" >> /etc/profile
+          mkdir -p ${NODE_HOME} && wget https://nodejs.org/dist/v${NODE_VERSION}/node-v${NODE_VERSION}-${NODE_DIST}.tar.gz && tar -zxf node-v${NODE_VERSION}-${NODE_DIST}.tar.gz -C ${NODE_HOME} && rm -rf node-v${NODE_VERSION}-${NODE_DIST}.tar.xz \
+            && ${NODE_HOME}/node-v${NODE_VERSION}-${NODE_DIST}/bin/node -v && node -v && npm -v 
           mkdir -p /usr/share/fonts/source-han-sans/ && mkdir -p /usr/share/fonts/source-han-serif/ && wget -q https://mirrors.bfsu.edu.cn/adobe-fonts/source-han-serif/SubsetOTF/SourceHanSerifCN.zip && unzip SourceHanSerifCN.zip -d ff && cp ff/*.otf /usr/share/fonts/source-han-serif/ && rm -rf ff SourceHanSerifCN.zip \
           && wget -q -o /usr/share/fonts/source-han-sans/SourceHanSansCN-Bold.otf https://mirrors.bfsu.edu.cn/adobe-fonts/source-han-sans/SubsetOTF/CN/SourceHanSansCN-Bold.otf \
           && wget -q -o /usr/share/fonts/source-han-sans/SourceHanSansCN-ExtraLight.otf https://mirrors.bfsu.edu.cn/adobe-fonts/source-han-sans/SubsetOTF/CN/SourceHanSansCN-ExtraLight.otf \
@@ -49,6 +51,7 @@ jobs:
           Y_USERNAME: ${{ secrets.Y_USERNAME }}
           Y_PASSWORD: ${{ secrets.Y_PASSWORD }}
         run: |
+          source /ect/profile
           node yn.js
       - name: Retry the workflow
         if: github.event_name == 'schedule' && failure()
