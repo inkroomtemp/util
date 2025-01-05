@@ -44,7 +44,11 @@ function upload_img(token,path){
     const service = new firefox.ServiceBuilder(`${process.cwd()}/geckodriver`);
     const options = new firefox.Options();
     options.addArguments('-headless');
-    driver = await new Builder().forBrowser('firefox').setFirefoxOptions(options).setFirefoxService(service).build()
+    driver = await new Builder().forBrowser('firefox')
+    .setFirefoxOptions(options)
+    // .setFirefoxService(service)
+    .usingServer('http://127.0.0.1:38472')
+    .build()
     vars = {}
 
     await driver.get("https://fufugal.com/")
@@ -115,8 +119,12 @@ function upload_img(token,path){
     await driver.manage().window().setRect({ x: 0, y: 0, width, height: height });
     await driver.findElement(By.css(".xbs")).click();
     await driver.sleep(3000);
-    var x = await driver.findElement(By.css(".popup"));
-    console.log(await x.getText());
+    try{
+        var x = await driver.findElement(By.css(".popup"));
+        console.log(await x.getText());    
+    }catch(e){
+        console.error(e);
+    }    
     let base64 = await driver.takeScreenshot();
     let date = new Date();
     const path =  (date.getFullYear()) +"-"+(date.getMonth()+1).toString().padStart(2,'0')+'-'+(date.getDate()).toString().padStart(2,'0')+ '.png';
