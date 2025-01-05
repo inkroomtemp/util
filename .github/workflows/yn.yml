@@ -45,14 +45,15 @@ jobs:
           && wget -q -o /usr/share/fonts/source-han-sans/SourceHanSansCN-Regular.otf https://mirrors.bfsu.edu.cn/adobe-fonts/source-han-sans/SubsetOTF/CN/SourceHanSansCN-Regular.otf \
           && fc-cache -fv
           wget -q https://github.com/mozilla/geckodriver/releases/download/v0.33.0/geckodriver-v0.33.0-linux32.tar.gz && tar -xf geckodriver-v0.33.0-linux32.tar.gz && rm -rf geckodriver-v0.33.0-linux32.tar.gz
-          npm i
+          ls
+          cd yn && npm i
       - name: Run
         env:
           Y_USERNAME: ${{ secrets.Y_USERNAME }}
           Y_PASSWORD: ${{ secrets.Y_PASSWORD }}
         run: |
           source /ect/profile
-          node yn.js
+          cd yn && node yn.js
       - name: Retry the workflow
         if: github.event_name == 'schedule' && failure()
         env:
