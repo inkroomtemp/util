@@ -50,7 +50,7 @@ jobs:
           useradd selenium &&  echo "selenium:selenium" | chpasswd
           su selenium
           id
-          nohup ./geckodriver --port 38472 > gec.log 2>&1 &
+          nohup sudo -u selenium ./geckodriver --port 38472 > gec.log 2>&1 &
       - name: Run
         env:
           Y_USERNAME: ${{ secrets.Y_USERNAME }}
@@ -58,7 +58,6 @@ jobs:
         run: |
           cd yn 
           su selenium
-          echo "user=[$USER]"
           node yn.js || (cat gec.log && exit 101)
       - name: Retry the workflow
         if: github.event_name == 'schedule' && failure()
