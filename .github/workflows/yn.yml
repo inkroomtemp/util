@@ -43,7 +43,7 @@ jobs:
           && wget -q -o /usr/share/fonts/source-han-sans/SourceHanSansCN-Regular.otf https://github.com/adobe-fonts/source-han-sans/raw/refs/heads/release/SubsetOTF/CN/SourceHanSansCN-Regular.otf \
           && fc-cache -fv
           cd yn 
-          wget -q https://github.com/mozilla/geckodriver/releases/download/v0.33.0/geckodriver-v0.33.0-linux32.tar.gz && tar -xf geckodriver-v0.33.0-linux32.tar.gz && rm -rf geckodriver-v0.33.0-linux32.tar.gz
+          wget -q https://github.com/mozilla/geckodriver/releases/download/v0.35.0/geckodriver-v0.33.0-linux32.tar.gz && tar -xf geckodriver-v0.35.0-linux32.tar.gz && rm -rf geckodriver-v0.35.0-linux32.tar.gz
           npm i
       - name: Run
         env:
