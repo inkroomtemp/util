@@ -49,7 +49,7 @@ jobs:
           export DEBIAN_FRONTEND=noninteractive
           useradd selenium &&  echo "selenium:selenium" | chpasswd
           su selenium
-          echo "user=[$USER]"
+          id
           nohup ./geckodriver --port 38472 > gec.log 2>&1 &
       - name: Run
         env:
