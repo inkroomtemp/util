@@ -14,17 +14,7 @@ use selenium::{
 
 fn new_driver() -> Result<Driver, selenium::SError> {
     let mut d = FirefoxBuilder::new()
-     //       .url("http://127.0.0.1:38472")
-             .driver(
-        format!(
-            "{}/geckodriver",
-            std::env::current_dir()
-                .map_err(|f| selenium::SError::Message(f.to_string()))
-                .unwrap()
-                .display()
-        )
-        .as_str(),
-    )
+            .url("http://127.0.0.1:38472")
             .head_less()
             .private()
             // .drivers("/app/geckodriver")
