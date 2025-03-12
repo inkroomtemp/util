@@ -69,7 +69,9 @@ fn run2(driver: &Driver) -> Result<(), selenium::SError> {
             // driver.actions().click(Some(&driver.find_element(By::Id("fastpostsubmit"))?)).perform()?;
             driver.find_element(By::Id("fastpostsubmit"))?.click()?;
         }
-
+    driver.get("https://www.qsbtxt.net/home.php?mod=spacecp&ac=credit")?;
+    let v = driver.find_element(By::Class("creditl"))?.get_text()?;
+    println!("{v}");
     Ok(())
 }
 
