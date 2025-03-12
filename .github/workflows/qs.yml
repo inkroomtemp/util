@@ -26,7 +26,7 @@ jobs:
         uses: actions/checkout@v4
       - name: Ready
         run: |
-          apt update -y && apt upgrade -y && apt install -y git firefox-esr wget unzip sudo curl gcc make cmake
+          apt update -y && apt upgrade -y && apt install -y git firefox-esr wget unzip sudo curl gcc make cmake pkg-config
           mkdir -p /usr/share/fonts/source-han-sans/ && mkdir -p /usr/share/fonts/source-han-serif/ && wget -q https://github.com/adobe-fonts/source-han-serif/raw/refs/heads/release/SubsetOTF/SourceHanSerifCN.zip && unzip SourceHanSerifCN.zip -d ff && cp ff/*.otf /usr/share/fonts/source-han-serif/ && rm -rf ff SourceHanSerifCN.zip \
           && wget -q -o /usr/share/fonts/source-han-sans/SourceHanSansCN-Bold.otf https://github.com/adobe-fonts/source-han-sans/raw/refs/heads/release/SubsetOTF/CN/SourceHanSansCN-Bold.otf \
           && wget -q -o /usr/share/fonts/source-han-sans/SourceHanSansCN-ExtraLight.otf https://github.com/adobe-fonts/source-han-sans/raw/refs/heads/release/SubsetOTF/CN/SourceHanSansCN-ExtraLight.otf \
