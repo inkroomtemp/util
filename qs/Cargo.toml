@@ -4,4 +4,4 @@ version = "0.1.0"
 edition = "2021"
 
 [dependencies]
-selenium = { git = "https://github.com/inkroom/selenium-rs", version = "0.1.0" ,rev ="6f8c276aa805be0aaa6fcc3949192b594dab4bf8" }
+selenium = { git = "https://github.com/inkroom/selenium-rs", version = "0.1.0" ,rev ="a5981933d15fa80053f941cd38213bddc2451b91" }
