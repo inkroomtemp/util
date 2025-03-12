@@ -1,0 +1,7 @@
+[package]
+name = "qs"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+selenium = { git = "https://github.com/inkroom/selenium-rs", version = "0.1.0" ,rev ="6f8c276aa805be0aaa6fcc3949192b594dab4bf8" }

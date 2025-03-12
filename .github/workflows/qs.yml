@@ -1,0 +1,56 @@
+name: qs
+
+# Controls when the workflow will run
+on:
+  schedule:
+    - cron: '0 0/1 * * *'
+  push:
+    paths:
+      - '.github/workflows/qs.yml'
+      - 'qs/**'
+  # Allows you to run this workflow manually from the Actions tab
+  workflow_dispatch:
+
+# A workflow run is made up of one or more jobs that can run sequentially or in parallel
+jobs:
+  # This workflow contains a single job called "build"
+  build:
+    # The type of runner that the job will run on
+    runs-on: ubuntu-20.04
+    container:
+      image: debian:stable-20231218-slim
+    # Steps represent a sequence of tasks that will be executed as part of the job
+    steps:
+      # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Ready
+        run: |
+          apt update -y && apt upgrade -y && apt install -y git firefox-esr wget unzip sudo
+          mkdir -p /usr/share/fonts/source-han-sans/ && mkdir -p /usr/share/fonts/source-han-serif/ && wget -q https://github.com/adobe-fonts/source-han-serif/raw/refs/heads/release/SubsetOTF/SourceHanSerifCN.zip && unzip SourceHanSerifCN.zip -d ff && cp ff/*.otf /usr/share/fonts/source-han-serif/ && rm -rf ff SourceHanSerifCN.zip \
+          && wget -q -o /usr/share/fonts/source-han-sans/SourceHanSansCN-Bold.otf https://github.com/adobe-fonts/source-han-sans/raw/refs/heads/release/SubsetOTF/CN/SourceHanSansCN-Bold.otf \
+          && wget -q -o /usr/share/fonts/source-han-sans/SourceHanSansCN-ExtraLight.otf https://github.com/adobe-fonts/source-han-sans/raw/refs/heads/release/SubsetOTF/CN/SourceHanSansCN-ExtraLight.otf \
+          && wget -q -o /usr/share/fonts/source-han-sans/SourceHanSansCN-Heavy.otf https://github.com/adobe-fonts/source-han-sans/raw/refs/heads/release/SubsetOTF/CN/SourceHanSansCN-Heavy.otf \
+          && wget -q -o /usr/share/fonts/source-han-sans/SourceHanSansCN-Light.otf https://github.com/adobe-fonts/source-han-sans/raw/refs/heads/release/SubsetOTF/CN/SourceHanSansCN-Light.otf \
+          && wget -q -o /usr/share/fonts/source-han-sans/SourceHanSansCN-Medium.otf https://github.com/adobe-fonts/source-han-sans/raw/refs/heads/release/SubsetOTF/CN/SourceHanSansCN-Medium.otf \
+          && wget -q -o /usr/share/fonts/source-han-sans/SourceHanSansCN-Normal.otf https://github.com/adobe-fonts/source-han-sans/raw/refs/heads/release/SubsetOTF/CN/SourceHanSansCN-Normal.otf \
+          && wget -q -o /usr/share/fonts/source-han-sans/SourceHanSansCN-Regular.otf https://github.com/adobe-fonts/source-han-sans/raw/refs/heads/release/SubsetOTF/CN/SourceHanSansCN-Regular.otf \
+          && fc-cache -fv
+          cd qs
+          wget -q https://github.com/mozilla/geckodriver/releases/download/v0.35.0/geckodriver-v0.35.0-linux32.tar.gz && tar -xf geckodriver-v0.35.0-linux32.tar.gz && rm -rf geckodriver-v0.35.0-linux32.tar.gz
+          chmod +x geckodriver
+          export DEBIAN_FRONTEND=noninteractive
+          useradd -m selenium &&  echo "selenium:selenium" | chpasswd
+          nohup sudo -u selenium ./geckodriver --port 38472 > gec.log 2>&1 &
+      - uses: dtolnay/rust-toolchain@stable
+      - name: Run
+        run: |
+          cd qs
+          cargo run
+      - name: Retry the workflow
+        if: github.event_name == 'schedule' && failure()
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          sleep 300
+          gh workflow run qs.yml
