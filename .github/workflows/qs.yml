@@ -46,6 +46,7 @@ jobs:
       - name: Run
         run: |
           cd qs
+          su selenium
           cargo run
       - name: Retry the workflow
         if: github.event_name == 'schedule' && failure()
