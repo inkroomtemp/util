@@ -19,7 +19,7 @@ fn new_driver() -> Result<Driver, selenium::SError> {
         format!(
             "{}/geckodriver",
             std::env::current_dir()
-                .map_err(|f| selenium::SError::message(f.to_string()))
+                .map_err(|f| selenium::SError::Message(f.to_string()))
                 .unwrap()
                 .display()
         )
