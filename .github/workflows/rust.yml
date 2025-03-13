@@ -17,7 +17,7 @@ on:
        type: 'string'
 jobs:
   version:
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-22.04
     permissions: write-all
     outputs:
       ve: ${{ steps.v.outputs.ve }}
@@ -92,7 +92,7 @@ jobs:
               echo "u=true" >> $GITHUB_OUTPUT
           fi
   arch: 
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-22.04
     needs: [version]
     outputs:
       dev_arch: ${{ steps.arch.outputs.dev_arch }}
@@ -136,7 +136,7 @@ jobs:
           fi
 
   musl:
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-22.04
     needs: [version, arch]
     strategy:
       matrix:
@@ -188,7 +188,7 @@ jobs:
           retention-days: 1
 
   musl-combile:
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-22.04
     permissions: write-all
     needs: [version, arch, musl]
     steps:
@@ -244,7 +244,7 @@ jobs:
             ghcr.io/${{ github.repository_owner }}/rust_musl_build:beta
           docker buildx imagetools inspect ghcr.io/${{ github.repository_owner }}/rust_musl_build:${{ needs.version.outputs.buildVe }}
   dev:
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-22.04
     permissions: write-all
     needs: [version, arch]
     if: needs.arch.outputs.u == 'true' || needs.version.outputs.u == 'true'
@@ -313,7 +313,7 @@ jobs:
           if-no-files-found: error
           retention-days: 1
   combine:
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-22.04
     permissions: write-all
     needs: [version, dev]
     # 使用 manifest 合并会报  is a manifest list  可能跟qemu buildx 有关，所以换种方案
