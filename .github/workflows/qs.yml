@@ -3,7 +3,7 @@ name: qs
 # Controls when the workflow will run
 on:
   schedule:
-    - cron: '0 0/1 * * *'
+    - cron: '0 9,10,11,12,13,14 * * *'
   push:
     paths:
       - '.github/workflows/qs.yml'
