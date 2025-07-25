@@ -55,3 +55,12 @@ jobs:
         run: |
           sleep 300
           gh workflow run qs.yml
+  alive:
+    name: Alive
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+      # - steps
+      - uses: entepotenz/keep-github-actions-alive-min-dependencies@v1
