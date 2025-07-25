@@ -59,7 +59,7 @@ fn run2(driver: &Driver) -> Result<(), selenium::SError> {
             //    let href = ele.unwrap().unwrap();
             
             driver.get(&href)?;
-            println!("href {} {}", href, driver..find_element(By::Id("thread_subject"))?.get_text()?);
+            println!("href {} {}", href, driver.find_element(By::Id("thread_subject"))?.get_text()?);
             driver
                 .find_element(By::Id("fastpostmessage"))?
                 .send_keys("感谢分享")?;
