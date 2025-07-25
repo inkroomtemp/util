@@ -57,8 +57,9 @@ fn run2(driver: &Driver) -> Result<(), selenium::SError> {
         for ele in hrefs {
             let href = ele;
             //    let href = ele.unwrap().unwrap();
-            println!("href {}", href);
+            
             driver.get(&href)?;
+            println!("href {} {}", href, driver..find_element(By::Id("thread_subject"))?.get_text()?);
             driver
                 .find_element(By::Id("fastpostmessage"))?
                 .send_keys("感谢分享")?;
