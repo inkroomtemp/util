@@ -41,7 +41,7 @@ jobs:
           if [[ "${{ inputs.v }}" == "" ]]
           then
             ve=$(rustc --version | awk '{print $2}')
-            d=$(docker run --rm ${{ github.repository_owner }}/rust:latest rustc --version || echo "rustc null")
+            d=$(docker run --rm inkbox/rust:latest rustc --version || echo "rustc null")
             echo "docker version=$d"
             echo "latest version=$ve"
             d=$(echo $d | awk '{print $2}')
