@@ -1,6 +1,8 @@
 const axios = require('axios');
 const cherio = require("cherio");
 
+ console.log('true')
+/*
 let now = JSON.parse( process.argv[2]);
 let newestVersion = process.argv[3];
 console.log(now)
@@ -38,5 +40,5 @@ axios.get('https://github.com/inkroomtemp/util/pkgs/container/rust')
     console.log('true')
 
 })
-
+*/
 
