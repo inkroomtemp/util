@@ -37,13 +37,13 @@ fn new_driver() -> Result<Driver, selenium::SError> {
 fn run2(driver: &Driver) -> Result<(), selenium::SError> {
     // 登陆
 
-    driver.get("https://www.qsbtxt.net/member.php?mod=logging&action=login")?;
+    driver.get("https://www.xiaobaotxt.org/member.php?mod=logging&action=login")?;
     driver.find_elements(By::TagName("input"))?[8].send_keys("2rZjOIUj4u")?;
     driver.find_elements(By::TagName("input"))?[9].send_keys("ZcCjyn9Hk0")?;
     driver.find_elements(By::TagName("button"))?[1].click()?;
     sleep(Duration::from_secs(5));
 
-        driver.get("https://www.qsbtxt.net/f51-1.html")?;
+        driver.get("https://www.xiaobaotxt.org/f51-1.html")?;
 
         // let a = driver
         //     .find_element(By::Id("portal_block_101_content"))?
@@ -70,7 +70,7 @@ fn run2(driver: &Driver) -> Result<(), selenium::SError> {
             // driver.actions().click(Some(&driver.find_element(By::Id("fastpostsubmit"))?)).perform()?;
             driver.find_element(By::Id("fastpostsubmit"))?.click()?;
         }
-    driver.get("https://www.qsbtxt.net/home.php?mod=spacecp&ac=credit")?;
+    driver.get("https://www.xiaobaotxt.org/home.php?mod=spacecp&ac=credit")?;
     let v = driver.find_element(By::Class("creditl"))?.get_text()?;
     println!("{v}");
     Ok(())
@@ -112,3 +112,4 @@ fn main() {
         }
     }
 }
+
