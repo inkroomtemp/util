@@ -47,6 +47,9 @@ jobs:
         run: |
           cd qs
           su selenium
+          echo "::group::编译"
+          cargo build
+          echo "::endgroup::"
           cargo run
       - name: Retry the workflow
         if: github.event_name == 'schedule' && failure()
@@ -54,7 +57,8 @@ jobs:
           GH_TOKEN: ${{ github.token }}
         run: |
           sleep 300
-          gh workflow run qs.yml
+          curl -X POST -H 'Authorization: Bearer $GH_TOKEN' https://api.github.com/repos/${{ github.action_repository }}/actions/workflows/qs.yml/dispatches -d '{"ref":"master"}'
+          # gh workflow run qs.yml
   alive:
     name: Alive
     runs-on: ubuntu-latest
