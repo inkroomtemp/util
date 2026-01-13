@@ -268,7 +268,7 @@ jobs:
     strategy:
       matrix:
         target: [{"platform":"linux/amd64","target":"x86_64-musl"},{"platform":"linux/arm64","target":"aarch64-musl"}]
-    # if: needs.version.outputs.buildVu == 'true'
+    if: needs.version.outputs.buildVu == 'true'
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
