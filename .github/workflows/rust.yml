@@ -289,8 +289,7 @@ jobs:
           password: ${{ secrets.DOCKER_HUB_PASSWORD }}
       - name: Ready
         run: |
-          echo "ARG TAG" >> Dockerfile.musl
-          echo "FROM blackdex/rust-musl:\${TAG}" >> Dockerfile.musl
+          echo "FROM blackdex/rust-musl:${{ matrix.target.target }}-stable-${{ needs.version.outputs.buildVe }}" >> Dockerfile.musl
           cat Dockerfile.musl
       - name: Build Docker image
         id: build
@@ -300,10 +299,8 @@ jobs:
           file: Dockerfile.musl
           labels: ${{ steps.meta.outputs.labels }}
           platforms: ${{ matrix.target.platform }}
-          outputs: type=image,name=${{ secrets.DOCKER_HUB_USERNAME }}/rust,push-by-digest=true,name-canonical=true,push=true
+          outputs: type=image,name=ghcr.io/${{ github.repository_owner }}/rust_musl_build,push-by-digest=true,name-canonical=true,push=true
           github-token: ${{ secrets.GITHUB_TOKEN }}
-          build-args: |
-            TAG=${{ matrix.target.target }}-stable-${{ needs.version.outputs.buildVe }}
       - name: Export digest
         id: export
         run: |
