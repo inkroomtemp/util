@@ -290,12 +290,13 @@ jobs:
       - name: Ready
         run: |
           echo "ARG TAG" >> Dockerfile.musl
-          echo "FROM blackdex/rust-musl:${TAG}" >> Dockerfile.musl
+          echo "FROM blackdex/rust-musl:\${TAG}" >> Dockerfile.musl
           cat Dockerfile.musl
       - name: Build Docker image
         id: build
         uses: docker/build-push-action@v5
         with:
+          context: .
           file: Dockerfile.musl
           labels: ${{ steps.meta.outputs.labels }}
           platforms: ${{ matrix.target.platform }}
