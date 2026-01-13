@@ -266,10 +266,8 @@ jobs:
     runs-on: ubuntu-22.04
     needs: [version, arch]
     strategy:
-      - matrix.platform: linux/amd64
-        matrix.target: x86_64-musl
-      - matrix.platform: linux/arm64
-        matrix.target: aarch64-musl
+      matrix:
+        target: [{"platform":"linux/amd64","target":"x86_64-musl"},{"platform":"linux/arm64","target":"aarch64-musl"}]
     # if: needs.version.outputs.buildVu == 'true'
     steps:
       - name: Checkout repository
@@ -292,7 +290,7 @@ jobs:
       - name: Export digest
         id: export
         run: |
-          docker pull --platform ${{ matrix.platform }} blackdex/rust-musl:${{ matrix.target }}-stable-${{ needs.version.outputs.buildVe }}
+          docker pull --platform ${{ matrix.target.platform }} blackdex/rust-musl:${{ matrix.target.target }}-stable-${{ needs.version.outputs.buildVe }}
           digest=$(docker images --digests inkbox/rust | head -n 2 | tail -n 1 | awk '{print $3}')
           echo "digest=$digest"
           docker push ghcr.io/${{ github.repository_owner }}/rust_musl_build:$digest
