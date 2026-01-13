@@ -288,7 +288,7 @@ jobs:
           username: ${{ secrets.DOCKER_HUB_USERNAME }}
           password: ${{ secrets.DOCKER_HUB_PASSWORD }}
       - name: Ready
-        runs: |
+        run: |
           echo "ARG TAG" >> Dockerfile.musl
           echo "FROM blackdex/rust-musl:${TAG}" >> Dockerfile.musl
           cat Dockerfile.musl
