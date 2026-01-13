@@ -292,6 +292,7 @@ jobs:
         run: |
           docker pull --platform ${{ matrix.target.platform }} blackdex/rust-musl:${{ matrix.target.target }}-stable-${{ needs.version.outputs.buildVe }}
           digest=$(docker images --digests blackdex/rust-musl | head -n 2 | tail -n 1 | awk '{print $3}')
+          docker tag blackdex/rust-musl:${{ matrix.target.target }}-stable-${{ needs.version.outputs.buildVe }} ghcr.io/${{ github.repository_owner }}/rust_musl_build
           echo "digest=$digest"
           docker push ghcr.io/${{ github.repository_owner }}/rust_musl_build:$digest
           mkdir -p /tmp/digests
