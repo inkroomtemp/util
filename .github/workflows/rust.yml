@@ -287,17 +287,29 @@ jobs:
         with:
           username: ${{ secrets.DOCKER_HUB_USERNAME }}
           password: ${{ secrets.DOCKER_HUB_PASSWORD }}
+      - name: Ready
+        runs: |
+          echo "ARG TAG" >> Dockerfile.musl
+          echo "FROM blackdex/rust-musl:${TAG}" >> Dockerfile.musl
+          cat Dockerfile.musl
+      - name: Build Docker image
+        id: build
+        uses: docker/build-push-action@v5
+        with:
+          file: Dockerfile.musl
+          labels: ${{ steps.meta.outputs.labels }}
+          platforms: ${{ matrix.target.platform }}
+          outputs: type=image,name=${{ secrets.DOCKER_HUB_USERNAME }}/rust,push-by-digest=true,name-canonical=true,push=true
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          build-args: |
+            TAG=${{ matrix.target.target }}-stable-${{ needs.version.outputs.buildVe }}
       - name: Export digest
         id: export
         run: |
-          docker pull --platform ${{ matrix.target.platform }} blackdex/rust-musl:${{ matrix.target.target }}-stable-${{ needs.version.outputs.buildVe }}
-          digest=$(docker images --digests blackdex/rust-musl | head -n 2 | tail -n 1 | awk '{print $3}')
-          docker tag blackdex/rust-musl:${{ matrix.target.target }}-stable-${{ needs.version.outputs.buildVe }} ghcr.io/${{ github.repository_owner }}/rust_musl_build
-          echo "digest=$digest"
-          docker push ghcr.io/${{ github.repository_owner }}/rust_musl_build:$digest
           mkdir -p /tmp/digests
+          digest="${{ steps.build.outputs.digest }}"
           touch "/tmp/digests/${digest#sha256:}"
-          arch="${{ matrix.platform }}"
+          arch="${{ matrix.target.platform }}"
           echo "arch=${arch//\//-}" >> $GITHUB_OUTPUT
       - name: Upload digest
         uses: actions/upload-artifact@v4
