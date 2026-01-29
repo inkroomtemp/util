@@ -294,21 +294,30 @@ jobs:
         with:
           username: ${{ secrets.DOCKER_HUB_USERNAME }}
           password: ${{ secrets.DOCKER_HUB_PASSWORD }}
-      - name: Ready
-        run: |
-          echo "FROM blackdex/rust-musl:${{ matrix.target.target }}-stable-${{ needs.version.outputs.buildVe }}" >> Dockerfile.musl
-          echo "RUN apt update -y && apt install -y wget curl git zip unzip"
-          cat Dockerfile.musl
+      - name: Docker meta
+        id: meta
+        uses: docker/metadata-action@v5
+        with:
+          images: |
+            ${{ secrets.DOCKER_HUB_USERNAME }}/rust
+          tags: |
+            type=raw,value=${{ needs.version.outputs.ve }}
+            type=raw,value=latest
+          labels: |
+            org.opencontainers.image.description=rust构建环境-${{ needs.version.outputs.buildVe }}
+            org.opencontainers.image.title=rust-${{ needs.version.outputs.buildVe }}
       - name: Build Docker image
         id: build
         uses: docker/build-push-action@v5
         with:
-          context: .
-          file: Dockerfile.musl
+          context: rust
+          file: rust/Dockerfile.musl
           labels: ${{ steps.meta.outputs.labels }}
           platforms: ${{ matrix.target.platform }}
           outputs: type=image,name=ghcr.io/${{ github.repository_owner }}/rust_musl_build,push-by-digest=true,name-canonical=true,push=true
           github-token: ${{ secrets.GITHUB_TOKEN }}
+          build-args: |
+            TAG=${{ matrix.target.target }}-stable-${{ needs.version.outputs.buildVe }}
       - name: Export digest
         id: export
         run: |

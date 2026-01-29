@@ -1,66 +1,9 @@
-FROM debian:buster
-ARG RUST_VERSION
-ENV CARGO_HOME=/usr/local/cargo
-ENV RUSTUP_HOME /usr/local/rustup
-ENV PATH ${PATH}:${CARGO_HOME}/bin:.
-RUN arch && echo "uname=$(uname -a)" && echo "-p=$(uname -p)" && echo "dpkg=$(dpkg --print-architecture)" && apt update -y && apt install -y musl-dev \
-  musl-tools \
-  file \
-  nano \
-  git \
-  zlib1g-dev \
-  cmake \
-  make \
-  g++ \
-  curl \
-  pkgconf \
-  ca-certificates \
-  xutils-dev \
-  libpq-dev \
-  libssl-dev \
-  --no-install-recommends && \
-  ln -s /usr/bin/musl-gcc /usr/bin/$(arch)-linux-musl-gcc && \
-  apt search linux-headers && \
-  if [ "$(dpkg --print-architecture)" = "amd64" ]; then apt install -y linux-headers-$(dpkg --print-architecture) ; fi && \
-  rm -rf /var/lib/apt/lists/*
-
-ARG OPENSSL_VER=1.1.1s
-ENV MUSL_PREFIX=/musl
-
-WORKDIR /libworkdir
-# OpenSSL 1.1 needs some linux headers to exists. They aren't installed by
-# default to the directory of musl includes, so we must link them.
-# OpenSSL 1.0 doesn't need these, but they won't do any harm.
-RUN if [ -d "/usr/include/asm-generic" ]; then mkdir -p /usr/include/$(arch)-linux-musl && ln -s /usr/include/asm-generic /usr/include/$(arch)-linux-musl/asm-generic ; fi && \
-    if [ -d "/usr/include/linux" ]; then mkdir -p /usr/include/$(arch)-linux-musl/ && ln -s /usr/include/linux /usr/include/$(arch)-linux-musl/linux ; fi && \
-    if [ -d "/usr/include/$(arch)-linux-gnu/asm" ]; then mkdir -p /usr/include/$(arch)-linux-musl && ln -s /usr/include/$(arch)-linux-gnu/asm /usr/include/$(arch)-linux-musl/asm ; fi && \
-    mkdir /workdir && mkdir $MUSL_PREFIX && \
-    curl -sL https://www.openssl.org/source/openssl-${OPENSSL_VER}.tar.gz | tar xz && cd openssl-${OPENSSL_VER} &&  \
-    CC="musl-gcc -fPIE -pie" LDFLAGS="-L/musl/lib/" CFLAGS="-I/musl/include" NO_FUZZ_TESTS="1" ./Configure no-unit-test no-asm  no-shared no-ssl2 no-ssl3 no-idea no-dtls no-dtls1 no-srp no-async --prefix=${MUSL_PREFIX} --openssldir=${MUSL_PREFIX}/ssl linux-$(arch) && \
-    make depend && make -j$(nproc) && make install && cd ../ && rm -rf libworkdir
-
-
-ENV PATH=/root/.cargo/bin:$MUSL_PREFIX/bin:$PATH \
-    TARGET=aarch_unknown_linux_musl \
-    HOST=aarch_unknown_linux_gnu \
-    PKG_CONFIG_ALLOW_CROSS=1 \
-    PKG_CONFIG_ALL_STATIC=true \
-    PKG_CONFIG_PATH_x86_64_unknown_linux_musl=$MUSL_PREFIX/lib/pkgconfig \
-    PKG_CONFIG_PATH_x86_64_unknown_linux_gnu=/usr/lib/aarch-linux-gnu/pkgconfig \
-    PQ_LIB_STATIC_X86_64_UNKNOWN_LINUX_MUSL=true \
-    PG_CONFIG_X86_64_UNKNOWN_LINUX_MUSL=/musl/bin/pg_config \ 
-    PKG_CONFIG_PATH_aarch_unknown_linux_musl=$MUSL_PREFIX/lib/pkgconfig \
-    PKG_CONFIG_PATH_aarch_unknown_linux_gnu=/usr/lib/aarch-linux-gnu/pkgconfig \
-    PQ_LIB_STATIC_aarch_UNKNOWN_LINUX_MUSL=true \
-    PG_CONFIG_aarch_UNKNOWN_LINUX_MUSL=/musl/bin/pg_config \ 
-    OPENSSL_STATIC=true \
-    OPENSSL_DIR=$MUSL_PREFIX \
-    SSL_CERT_FILE=/etc/ssl/certs/ca-certificates.crt \
-    SSL_CERT_DIR=/etc/ssl/certs \
-    LIBZ_SYS_STATIC=1 \
-    RUST_VERSION=${RUST_VERSION}
-
-
-RUN curl https://sh.rustup.rs -sSf | sh -s -- -y --default-toolchain $RUST_VERSION && rustup target add $(arch)-unknown-linux-musl && if [ $(arch) = "x86_64" ] ; then apt update -y && apt search mingw && apt install -y mingw-w64 && rustup target add x86_64-pc-windows-gnu ; fi
-
-WORKDIR /app
+ARG TAG
+FROM blackdex/rust-musl:${TAG}
+RUN dpkgArch="$(dpkg --print-architecture)"; \
+    case "${dpkgArch##*-}" in \
+        amd64)  sed -i "s@http://.*archive.ubuntu.com@https://mirrors.tuna.tsinghua.edu.cn@g" /etc/apt/sources.list.d/ubuntu.sources && sed -i "s@http://.*security.ubuntu.com@https://mirrors.tuna.tsinghua.edu.cn@g" /etc/apt/sources.list.d/ubuntu.sources ;; \
+        arm64) sed -i "s@http://ports.ubuntu.com@https://mirrors.ustc.edu.cn@g" /etc/apt/sources.list.d/ubuntu.sources  ;; \
+        *) echo >&2 "unsupported architecture: ${dpkgArch}" ;; \
+    esac; apt update -y
+RUN apt install -y curl wget zip
