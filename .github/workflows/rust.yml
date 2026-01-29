@@ -17,7 +17,7 @@ on:
        type: 'string'
 jobs:
   version:
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-24.04
     permissions: write-all
     outputs:
       ve: ${{ steps.v.outputs.ve }}
@@ -84,7 +84,14 @@ jobs:
             else 
               echo "最新版本 ${{ steps.v.outputs.ve }}"
               echo "ve=${{ steps.v.outputs.ve }}" >> $GITHUB_OUTPUT
-              echo "u=true" >> $GITHUB_OUTPUT
+              # 判断镜像是否存在
+              code=$(curl -s "https://registry.hub.docker.com/v2/repositories/blackdex/rust-musl/tags/x86_64-musl-stable-${{ steps.v.outputs.ve }}"  -w "%{http_code}" -o /dev/null)
+              if [[ "$code" == "200" ]]; then
+                echo "u=true" >> $GITHUB_OUTPUT
+              else
+                echo "尚未更新"
+                echo "u=true" >> $GITHUB_OUTPUT
+              fi
             fi
           else
               echo "手动版本 ${{ inputs.v }}"
@@ -92,7 +99,7 @@ jobs:
               echo "u=true" >> $GITHUB_OUTPUT
           fi
   arch: 
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-24.04
     needs: [version]
     outputs:
       dev_arch: ${{ steps.arch.outputs.dev_arch }}
@@ -136,7 +143,7 @@ jobs:
           fi
 
   dev:
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-24.04
     permissions: write-all
     needs: [version, arch]
     if: needs.arch.outputs.u == 'true' || needs.version.outputs.u == 'true'
@@ -205,7 +212,7 @@ jobs:
           if-no-files-found: error
           retention-days: 1
   combine:
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-24.04
     permissions: write-all
     needs: [version, dev]
     # 使用 manifest 合并会报  is a manifest list  可能跟qemu buildx 有关，所以换种方案
@@ -263,7 +270,7 @@ jobs:
           echo "------------------------"
        #   docker buildx imagetools inspect ghcr.io/${{ github.repository_owner }}/rust:${{ needs.version.outputs.ve }}
   musl:
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-24.04
     needs: [version, arch]
     strategy:
       matrix:
@@ -290,6 +297,7 @@ jobs:
       - name: Ready
         run: |
           echo "FROM blackdex/rust-musl:${{ matrix.target.target }}-stable-${{ needs.version.outputs.buildVe }}" >> Dockerfile.musl
+          echo "RUN apt update -y && apt install -y wget curl git zip unzip"
           cat Dockerfile.musl
       - name: Build Docker image
         id: build
@@ -318,7 +326,7 @@ jobs:
           retention-days: 1
 
   musl-combile:
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-24.04
     permissions: write-all
     needs: [version, arch, musl]
     steps:
