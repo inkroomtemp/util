@@ -195,7 +195,7 @@ jobs:
           file: runtime/Dockerfile.rust
           labels: ${{ steps.meta.outputs.labels }}
           platforms: ${{ matrix.platform }}
-          outputs: type=image,name=${{ secrets.DOCKER_HUB_USERNAME }}/rust,push-by-digest=true,name-canonical=true,push=true
+          outputs: type=image,name=${{ secrets.DOCKER_HUB_USERNAME }}/rust,push-by-digest=true,name-canonical=true,push=true,annotation-index.org.opencontainers.image.description=${{ fromJSON(steps.meta.outputs.json).labels['org.opencontainers.image.description'] }},annotation-index.org.opencontainers.image.title=${{ fromJSON(steps.meta.outputs.json).labels['org.opencontainers.image.title'] }}
           github-token: ${{ secrets.GITHUB_TOKEN }}
           build-args: |
             RUST_VERSION=${{ needs.version.outputs.ve }}
@@ -314,7 +314,7 @@ jobs:
           file: rust/Dockerfile.musl
           labels: ${{ steps.meta.outputs.labels }}
           platforms: ${{ matrix.target.platform }}
-          outputs: type=image,name=ghcr.io/${{ github.repository_owner }}/rust_musl_build,push-by-digest=true,name-canonical=true,push=true
+          outputs: type=image,name=ghcr.io/${{ github.repository_owner }}/rust_musl_build,push-by-digest=true,name-canonical=true,push=true,annotation-index.org.opencontainers.image.description=${{ fromJSON(steps.meta.outputs.json).labels['org.opencontainers.image.description'] }},annotation-index.org.opencontainers.image.title=${{ fromJSON(steps.meta.outputs.json).labels['org.opencontainers.image.title'] }}
           github-token: ${{ secrets.GITHUB_TOKEN }}
           build-args: |
             TAG=${{ matrix.target.target }}-stable-${{ needs.version.outputs.buildVe }}
