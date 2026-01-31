@@ -256,14 +256,10 @@ jobs:
           docker buildx imagetools create $(jq -cr '.tags | map("-t " + .) | join(" ")' <<< "$DOCKER_METADATA_OUTPUT_JSON") $(printf '${{ secrets.DOCKER_HUB_USERNAME }}/rust@sha256:%s ' *)
           # ghcr 429错误
           # echo "-------------ghcr-----------" 
-          # docker buildx imagetools create \
-          #  --tag ghcr.io/${{ github.repository_owner }}/rust:${{ needs.version.outputs.ve }} \
-          #  ${{ secrets.DOCKER_HUB_USERNAME }}/rust:${{ needs.version.outputs.ve }}
-          #sleep 20
-          #echo "---------${{ needs.version.outputs.ve }}-------"
-          #docker buildx imagetools create \
-          #  --tag ghcr.io/${{ github.repository_owner }}/rust:${{ needs.version.outputs.ve }} \
-          #  ${{ secrets.DOCKER_HUB_USERNAME }}/rust:${{ needs.version.outputs.ve }}
+           docker buildx imagetools create \
+            --tag ghcr.io/${{ github.repository_owner }}/rust:${{ needs.version.outputs.ve }} \
+            --annotation "index:org.opencontainers.image.description=${{ fromJSON(steps.meta.outputs.json).labels['org.opencontainers.image.description'] }}" \
+            ${{ secrets.DOCKER_HUB_USERNAME }}/rust:${{ needs.version.outputs.ve }}
       - name: Inspect image
         run: |
           docker buildx imagetools inspect ${{ secrets.DOCKER_HUB_USERNAME }}/rust:${{ needs.version.outputs.ve }}
@@ -370,7 +366,8 @@ jobs:
         working-directory: /tmp/digests
         run: |
           tree /tmp/digests
-          docker buildx imagetools create $(jq -cr '.tags | map("-t " + .) | join(" ")' <<< "$DOCKER_METADATA_OUTPUT_JSON") $(printf 'ghcr.io/${{ github.repository_owner }}/rust_musl_build@sha256:%s ' *)
+          docker buildx imagetools create --annotation "index:org.opencontainers.image.description=${{ fromJSON(steps.meta.outputs.json).labels['org.opencontainers.image.description'] }}" \
+          $(jq -cr '.tags | map("-t " + .) | join(" ")' <<< "$DOCKER_METADATA_OUTPUT_JSON") $(printf 'ghcr.io/${{ github.repository_owner }}/rust_musl_build@sha256:%s ' *)
 
       - name: Test musl Image
         uses: docker/build-push-action@v5
@@ -388,5 +385,6 @@ jobs:
           docker buildx imagetools create \
             --tag ghcr.io/${{ github.repository_owner }}/rust_musl_build:latest \
             --tag ghcr.io/${{ github.repository_owner }}/rust_musl_build:${{ needs.version.outputs.buildVe }} \
+            --annotation "index:org.opencontainers.image.description=${{ fromJSON(steps.meta.outputs.json).labels['org.opencontainers.image.description'] }}" \
             ghcr.io/${{ github.repository_owner }}/rust_musl_build:beta
           docker buildx imagetools inspect ghcr.io/${{ github.repository_owner }}/rust_musl_build:${{ needs.version.outputs.buildVe }}
