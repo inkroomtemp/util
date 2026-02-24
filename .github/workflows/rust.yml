@@ -90,7 +90,7 @@ jobs:
                 echo "u=true" >> $GITHUB_OUTPUT
               else
                 echo "尚未更新"
-                echo "u=true" >> $GITHUB_OUTPUT
+                echo "u=false" >> $GITHUB_OUTPUT
               fi
             fi
           else
