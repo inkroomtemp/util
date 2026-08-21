@@ -5,5 +5,4 @@ RUN dpkgArch="$(dpkg --print-architecture)"; \
         amd64)  sed -i "s@http://.*archive.ubuntu.com@https://mirrors.tuna.tsinghua.edu.cn@g" /etc/apt/sources.list.d/ubuntu.sources && sed -i "s@http://.*security.ubuntu.com@https://mirrors.tuna.tsinghua.edu.cn@g" /etc/apt/sources.list.d/ubuntu.sources ;; \
         arm64) sed -i "s@http://ports.ubuntu.com@https://mirrors.ustc.edu.cn@g" /etc/apt/sources.list.d/ubuntu.sources  ;; \
         *) echo >&2 "unsupported architecture: ${dpkgArch}" ;; \
-    esac; apt update -y
-RUN apt install -y curl wget zip
+    esac; apt update -y; apt install -y curl wget zip unzip sudo libwebkit2gtk-4.1-dev libappindicator3-dev librsvg2-dev patchelf xdg-utils zip nasm tree pkg-config ca-certificates bsdmainutils docker.io docker-buildx
