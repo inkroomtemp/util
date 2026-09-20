@@ -89,6 +89,7 @@ function upload_img(token,path){
     console.log(await count.getText())
 
     await driver.get('https://fufugal.com');
+    await driver.sleep(3000);
     count = await driver.findElement(By.css(".sign-user-status"));
     console.log('count', await count.getText())
 
