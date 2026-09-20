@@ -89,7 +89,7 @@ function upload_img(token,path){
     console.log(await count.getText())
 
     await driver.get('https://fufugal.com');
-    count = await driver.findElement(By.css(".el-tooltip__trigger:nth-child(1)"));
+    count = await driver.findElement(By.css(".sign-user-status"));
     console.log('count', await count.getText())
 
 // 模拟滚动
