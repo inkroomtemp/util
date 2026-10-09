@@ -49,7 +49,7 @@ fn run2(driver: &Driver) -> Result<(), selenium::SError> {
         //     .find_element(By::Id("portal_block_101_content"))?
         //     .find_elements(By::TagName("a"))?;
         // let hrefs = driver.find_elements(By::TagName("tbody"))?[7..].iter().map(|f|f.find_elements(By::TagName("a")).unwrap()[1].get_property("href").unwrap().unwrap()).collect::<Vec<String>>();
-        let a = &driver.find_elements(By::Class("xst"))?[4..];
+        let a = &driver.find_elements(By::Css(".xm-list li a"))?;
         let hrefs = a
             .iter()
             .map(|f| f.get_property("href").unwrap().unwrap())
@@ -59,19 +59,19 @@ fn run2(driver: &Driver) -> Result<(), selenium::SError> {
             //    let href = ele.unwrap().unwrap();
             
             driver.get(&href)?;
-            println!("href {} {}", href, driver.find_element(By::Id("thread_subject"))?.get_text()?);
+            println!("href {} {}", href, driver.find_element(By::Class("xm-subject"))?.get_text()?);
             driver
-                .find_element(By::Id("fastpostmessage"))?
+                .find_element(By::Css("#xmreplyform > textarea:nth-child(4)"))?
                 .send_keys("感谢分享")?;
             sleep(Duration::from_secs(5));
 
             // driver.find_elements(By::TagName("strong"))?[6].click()?;
 
             // driver.actions().click(Some(&driver.find_element(By::Id("fastpostsubmit"))?)).perform()?;
-            driver.find_element(By::Id("fastpostsubmit"))?.click()?;
+            driver.find_element(By::Css("button.xm-btn:nth-child(1)"))?.click()?;
         }
-    driver.get("https://www.xiaobaotxt.org/home.php?mod=spacecp&ac=credit")?;
-    let v = driver.find_element(By::Class("creditl"))?.get_text()?;
+    driver.get("https://www.xiaotxt.me/plugin.php?id=sfront:ucenter")?;
+    let v = driver.find_element(By::Class("xm-grid"))?.get_text()?;
     println!("{v}");
     Ok(())
 }

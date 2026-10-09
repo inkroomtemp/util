@@ -23,7 +23,7 @@ jobs:
     steps:
       # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
       - name: Ready
         run: |
           apt update -y && apt upgrade -y && apt install -y git firefox-esr wget unzip sudo curl gcc make cmake pkg-config libssl-dev
@@ -65,6 +65,6 @@ jobs:
     permissions:
       contents: write
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
       # - steps
       - uses: entepotenz/keep-github-actions-alive-min-dependencies@v1

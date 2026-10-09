@@ -27,7 +27,7 @@ jobs:
       buildVu: ${{ steps.buildV.outputs.u }}
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
       - name: Checkout Runtime
         run: |
           git clone https://gist.github.com/inkroom/501548078a930c6f3bd98ea257409648 runtime
