@@ -49,7 +49,7 @@ fn run2(driver: &Driver) -> Result<(), selenium::SError> {
         //     .find_element(By::Id("portal_block_101_content"))?
         //     .find_elements(By::TagName("a"))?;
         // let hrefs = driver.find_elements(By::TagName("tbody"))?[7..].iter().map(|f|f.find_elements(By::TagName("a")).unwrap()[1].get_property("href").unwrap().unwrap()).collect::<Vec<String>>();
-        let a = &driver.find_elements(By::Css(".xm-list li a"))?;
+        let a = &driver.find_elements(By::Css(".xm-list li a"))?[4..];
         let hrefs = a
             .iter()
             .map(|f| f.get_property("href").unwrap().unwrap())
