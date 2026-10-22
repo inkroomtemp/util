@@ -21,7 +21,7 @@ jobs:
       image: debian:stable-20231218-slim
     # Steps represent a sequence of tasks that will be executed as part of the job
     steps:
-      - name: Ready
+      - name: Runtime
         env:
           NODE_DIST: linux-x64
           NODE_HOME: /usr/local/lib/nodejs
@@ -39,6 +39,12 @@ jobs:
           && wget -q -o /usr/share/fonts/source-han-sans/SourceHanSansCN-Normal.otf https://github.com/adobe-fonts/source-han-sans/raw/refs/heads/release/SubsetOTF/CN/SourceHanSansCN-Normal.otf \
           && wget -q -o /usr/share/fonts/source-han-sans/SourceHanSansCN-Regular.otf https://github.com/adobe-fonts/source-han-sans/raw/refs/heads/release/SubsetOTF/CN/SourceHanSansCN-Regular.otf \
           && fc-cache -fv
+          
+      # slim环境下没有git，checkout会使用github rest api下载代码，不使用git clone，导致gh命令无法执行
+      - name: Checkout
+        uses: actions/checkout@v7
+      - name: Selenium
+        run: |
           cd yn 
           wget -q https://github.com/mozilla/geckodriver/releases/download/v0.35.0/geckodriver-v0.35.0-linux32.tar.gz && tar -xf geckodriver-v0.35.0-linux32.tar.gz && rm -rf geckodriver-v0.35.0-linux32.tar.gz
           npm i
@@ -46,9 +52,6 @@ jobs:
           export DEBIAN_FRONTEND=noninteractive
           useradd -m selenium &&  echo "selenium:selenium" | chpasswd
           nohup sudo -u selenium ./geckodriver --port 38472 > gec.log 2>&1 &
-      # slim环境下没有git，checkout会使用github rest api下载代码，不使用git clone，导致gh命令无法执行
-      - name: Checkout
-        uses: actions/checkout@v7
       - name: GH
         run: |
           (type -p wget >/dev/null || (apt update && apt install wget -y)) && mkdir -p -m 755 /etc/apt/keyrings && out=$(mktemp) && wget -nv -O$out https://cli.github.com/packages/githubcli-archive-keyring.gpg && cat $out | tee /etc/apt/keyrings/githubcli-archive-keyring.gpg > /dev/null && chmod go+r /etc/apt/keyrings/githubcli-archive-keyring.gpg && mkdir -p -m 755 /etc/apt/sources.list.d && echo "deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/githubcli-archive-keyring.gpg] https://cli.github.com/packages stable main" | tee /etc/apt/sources.list.d/github-cli.list > /dev/null && apt update && sudo apt install gh -y
