@@ -65,5 +65,8 @@ jobs:
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
+          ls -all
+          echo "========"
+          pwd
           sleep 300
           gh workflow run yn.yml
