@@ -92,12 +92,21 @@ function upload_img(token,path){
     await driver.sleep(3000);
     count = await driver.findElement(By.css(".sign-user-status"));
     console.log('count', await count.getText())
-
+// 小精灵寻宝
+    try{
+        var x = await driver.findElement(By.css(".popup"));
+        console.log(await x.getText());    
+    }catch(e){
+        console.error(e);
+    }  
+    
 // 模拟滚动
+/*
+    
     await driver.wait(until.elementIsVisible(await driver.findElement(By.css('img'))));
     await driver.executeScript("let m = $('img[data-src]');for(let i=0;i<m.length;i++){let h = m[i];h.setAttribute('src',h.getAttribute('data-src'))};");
     await driver.sleep(3000);
-
+*/
     /*
     let js_h = 'return document.body.clientHeight';
     let h = await driver.executeScript(js_h);
@@ -123,12 +132,7 @@ function upload_img(token,path){
     await driver.manage().window().setRect({ x: 0, y: 0, width, height: height });
     await driver.findElement(By.css(".xbs")).click();
     await driver.sleep(3000);
-    try{
-        var x = await driver.findElement(By.css(".popup"));
-        console.log(await x.getText());    
-    }catch(e){
-        console.error(e);
-    }    
+      
     let base64 = await driver.takeScreenshot();
     let date = new Date();
     const path =  (date.getFullYear()) +"-"+(date.getMonth()+1).toString().padStart(2,'0')+'-'+(date.getDate()).toString().padStart(2,'0')+ '.png';
